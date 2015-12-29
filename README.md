@@ -2,7 +2,7 @@ Hotel
 =====
 Helps you manage all of those keys you're giving out.
 
-[![Build Status](https://travis-ci.org/davidrivera/hotel.svg?branch=master)](https://travis-ci.org/davidrivera/hotel)
+[![Build Status](https://travis-ci.org/davidrivera/hotel.svg?branch=master)](https://travis-ci.org/davidrivera/hotel) [![Code Climate](https://codeclimate.com/github/davidrivera/hotel/badges/gpa.svg)](https://codeclimate.com/github/davidrivera/hotel) [![Inline docs](http://inch-ci.org/github/davidrivera/hotel.svg?branch=master)](http://inch-ci.org/github/davidrivera/hotel)
 
 ## Setup
 
