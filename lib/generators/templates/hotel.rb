@@ -4,21 +4,18 @@
 # @yieldparam config
 # @yieldreturn config
 Hotel.configure do |config|
-  config.options = {
+  # The time to expire for the tokens
+  # config.expiry =           24.hours
 
-    # The time to expire for the tokens
-    # expiry:           24.hours,
+  # The hashing method to for the tokens
+  # config.hashing_method =   'HS512',
 
-    # The hashing method to for the tokens
-    #hashing_method:    'HS512',
+  # the issuer of the tokens
+  # config.issuer =           'api.example.com',
 
-    # the issuer of the tokens
-    #issuer:            'api.example.com',
+  # the default audience of the tokens
+  # config.default_audience = 'example.com',
 
-    # the default audience of the tokens
-    #default_audience:  'example.com',
-
-    # the location of redis config file
-    #redis_config: File.join(Rails.root, 'config', 'redis.yml')
-  }
+  # the location of redis config file
+  # config.redis_config = File.join(Rails.root, 'config', 'redis.yml')
 end

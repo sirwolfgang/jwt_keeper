@@ -2,35 +2,21 @@ module Hotel
 
   # Container object for options
   # parsed by initializer
-  #
-  # @attr [hash] options
-  class Configuration
+  class Configuration < OpenStruct
 
-    attr_accessor :options
+    DEFAULTS = {
+      hashing_method: 'HS512',
+      expiry: 24.hours,
+      issuer: 'api.example.com',
+      default_audience: 'example.com',
+      redis_config: nil
+    }
 
     # Creates a Configuration object with blank options
-    def initialize
-      @options = {}
+    def initialize(params)
+      super(DEFAULTS.merge(params))
     end
 
-    def hashing_method
-      @options[:hashing_method]
-    end
-
-    def expiry
-      @options[:expiry]
-    end
-
-    def issuer
-      @options[:issuer]
-    end
-
-    def audience
-      @options[:default_audience]
-    end
-
-    def redis_config
-      @options[:redis_config]
-    end
   end
+
 end

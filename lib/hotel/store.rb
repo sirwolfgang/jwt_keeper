@@ -1,17 +1,13 @@
 module Hotel
+
   # Wrapper class around redis to preform simple
   # actions to set and get tokens in our store
   class Store
 
     def initialize(config)
-
       @config = config
-      
-      opts = connection_options
-      
-      puts opts
 
-      @redis = Redis.new(opts)
+      @redis = Redis.new(connection_options)
     end
 
     # places a token in redis with the current
@@ -28,7 +24,7 @@ module Hotel
     #
     # @param token
     # @return null|timestamp
-    def is_expired?(token)
+    def expired?(token)
       get(token).present?
     end
 
@@ -58,9 +54,9 @@ module Hotel
     #
     # @return hash
     def connection_options
-      puts @config
-      puts @config.redis_config
       YAML.load(ERB.new(IO.read(@config.redis_config)).result)[Rails.env]
     end
+
   end
+
 end

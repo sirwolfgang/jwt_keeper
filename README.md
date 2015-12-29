@@ -1,4 +1,4 @@
-Hotel 
+Hotel
 =====
 Helps you manage all of those keys you're giving out.
 
@@ -17,6 +17,23 @@ development:
 ```
 
 *  u dun
+
+## Basic Usage
+Here are the basic methods you can call to perform various operations
+
+```rb
+Hotel.token.generate(your_custom_claim_hash)
+
+Hotel.token.invalidate(some_token)
+
+Hotel.token.refresh(token)
+
+Hotel.token.validate(token)
+
+Hotel.token.validate!(token)
+
+Hotel.token.valid?(token)
+```
 
 ## How invalidation happens
 [JSON Web Tokens](https://jwt.io/) by nature cannot be invalidated, there are few methods

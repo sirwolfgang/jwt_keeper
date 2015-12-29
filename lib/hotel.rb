@@ -11,9 +11,7 @@ require 'hotel/version'
 # auth token
 module Hotel
 
-  class << self
-      attr_accessor :configuration, :token
-    end
+  attr_accessor :configuration, :token
 
   # static method to define a Configuration
   # object with the given initialized data
@@ -23,4 +21,5 @@ module Hotel
 
     self.token ||= Token.new(self.configuration, Store.new(self.configuration))
   end
+
 end
