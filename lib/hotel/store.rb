@@ -54,6 +54,8 @@ module Hotel
     #
     # @return hash
     def connection_options
+      puts @config
+      puts @config.redis_config
       YAML.load(ERB.new(IO.read(@config.redis_config)).result)[Rails.env]
     end
   end
