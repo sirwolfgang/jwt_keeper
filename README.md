@@ -1,6 +1,8 @@
-Hotel
+Hotel 
 =====
 Helps you manage all of those keys you're giving out.
+
+[![Build Status](https://travis-ci.org/davidrivera/hotel.svg?branch=master)](https://travis-ci.org/davidrivera/hotel)
 
 ## Setup
 
