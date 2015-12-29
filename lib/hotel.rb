@@ -1,3 +1,9 @@
+require 'hotel/configuration'
+require 'hotel/token'
+require 'hotel/store'
+require 'hotel/invalid_jwt_error'
+require 'hotel/version'
+
 # This module encapsulates the functionality
 # for generating, retrieving, and validating an
 # auth token
@@ -13,6 +19,6 @@ module Hotel
     self.configuration ||= Configuration.new
     yield(configuration)
 
-    self.markdown ||= Markdown.new
+    self.markdown ||= Token.new(self.configuration)
   end
 end

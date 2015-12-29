@@ -13,5 +13,21 @@ module Hotel
     def initialize
       @@options = {}
     end
+
+    def hashing_method
+      @@options.hashing_method
+    end
+
+    def expiry
+      @@options.expiry
+    end
+
+    def issuer
+      @@options.issuer
+    end
+
+    def audience
+      @@options.default_audience
+    end
   end
 end

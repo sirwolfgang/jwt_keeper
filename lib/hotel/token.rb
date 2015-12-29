@@ -3,14 +3,6 @@
 # auth token
 module Hotel
 
-  EXPIRY = 24.hours
-
-  HASHING_METHOD = 'HS512'
-
-  ISSUER = 'api.klewk.com'
-
-  AUDIENCE = 'klewk.com'
-
   class Token
 
     def initialize(config)
@@ -32,25 +24,18 @@ module Hotel
         raise InvalidJwtError.expired_token
       end
 
-      date = DateTime.iso8601(tok['exp'])
-      expires = date - DateTime.now
-      seconds = ((expires) * 24 * 60 * 60).to_i
-
-      TokenStore.expire(token, seconds)
+      Store.expire(token, invalidation_expiry_for_token(token))
     end
 
-    # For a given user generates
+    # For given claims generates
     # an encoded JWT
     #
-    # @param  user
+    # @param  user_claims
     # @return string
-    def generate(user)
+    def generate(user_claims)
+      return false unless user_claims.is_a?(Hash)
 
-      if user
-        return JWT.encode(payload(user.tokenize(request.base_url)), secret, HASHING_METHOD)
-      end
-
-      false
+      encode(user_claims)
     end
 
     # We need to refind the user and tokenize
@@ -64,12 +49,9 @@ module Hotel
 
       invalidate(jwt)
 
-      sub = parse_token_subject(decoded)
-      u = User.find sub['id']
+      user_claims = Hash[decoded.to_a - defaul_claims.to_a]
 
-      # sign_in u
-
-      JWT.encode(payload(u.tokenize(request.base_url)), secret, HASHING_METHOD)
+      encode(user_claims)
     end
 
     # For the given encoded JWT
@@ -79,12 +61,12 @@ module Hotel
     # @return [true]
     def validate(jwt)
 
-      if TokenStore.is_expired?(jwt)
+      if Store.is_expired?(jwt)
         raise InvalidJwtError.invalid_token
       end
 
       begin
-        token = decode_token(jwt)
+        token = decode(jwt)
       rescue JWT::DecodeError
         raise InvalidJwtError.invalid_token
       rescue JWT::ExpiredSignature
@@ -95,93 +77,66 @@ module Hotel
         raise InvalidJwtError.early_token
       end
 
-      if token['iss'] != 'api.klewk.com'
+      if token['iss'] != @config.issuer
         raise InvalidJwtError.bad_issuer
       end
 
-      if token['aud'] != 'klewk.com'
+      if token['aud'] != @config.audience
         raise InvalidJwtError.lousy_audience
       end
 
-      # TODO: logging
-
       token
-    end
-
-    def decode_token(token)
-      JWT.decode(token, secret).first
-    end
-
-    # For a given decoded token
-    # will try to extract the
-    # subject claim
-    #
-    # @param token
-    # @return hash
-    def parse_token_subject(token)
-      subject = token['sub']
-
-      if subject && subject.json?
-        return JSON.parse(subject)
-      end
-
-      subject
-    end
-
-    # Will check the request headers
-    # for the given HTTP-CLIENT-TOKEN
-    # and validate the found token
-    # TODO: SIGN IN USER
-    def require_authentication
-      jwt = request.headers['HTTP-CLIENT-TOKEN']
-
-      @token = validate(jwt)
-      @token_subject = parse_token_subject(@token)
-
-      @current_user = User.find @token_subject['id']
-    end
-
-    # This is a sketchy check
-    # it will catch any parse errors
-    # only use this if authentication
-    # isn't required but could be used
-    def try_authentication
-      begin
-        require_authentication
-      rescue
-        return
-      end
     end
 
     alias_method :invalidate_token, :invalidate
     alias_method :generate_token, :generate
     alias_method :refresh_token, :refresh
+    alias_method :validate_token, :validate
 
     private
 
-      # Gets the jwt secret from the
-      # application secrets
-      def secret
-        Rails.application.secrets[:jwt_secret]
-      end
+    def invalidation_expiry_for_token(token)
+      date = DateTime.iso8601(token['exp'])
+      expires = date - DateTime.now
+      ((expires) * 24 * 60 * 60).to_i
+    end
 
-      # Given a subject produces a token object
-      # to be issued
-      #
-      # @return a hash ready to be jwt encoded
-      def payload(subject)
-        expires = EXPIRY.from_now.iso8601
-        now = DateTime.now.iso8601
+    def encode(claims)
+      JWT.encode(payload(claims), secret, @config.hashing_method)
+    end
 
-        {
-          :iss => ISSUER,                    # issuer
-          :sub => subject,                   # subject
-          :aud => AUDIENCE,                  # audience
-          :exp => expires,                   # expiration time
-          :nbf => now,                       # not before
-          :iat => now,                       # issued at
-          :jti => SecureRandom.uuid          # JWT ID
-        }
-      end
+    def decode(token)
+      JWT.decode(token, secret).first
+    end
+
+    # Gets the jwt secret from the
+    # application secrets
+    def secret
+      Rails.application.secrets[:jwt_secret]
+    end
+
+    # Given given the user claims produces a token object
+    # to be issued
+    #
+    # @param user_claims
+    # @return a hash ready to be jwt encoded
+    def payload(user_claims)
+      defaul_claims.merge(user_claims)
+    end
+
+    def defaul_claims
+      expires = @config.expiry.from_now.iso8601
+      now = DateTime.now.iso8601
+
+      {
+        :iss => @config.issuer,            # issuer
+        :sub => subject,                   # subject
+        :aud => @config.audience,          # audience
+        :exp => expires,                   # expiration time
+        :nbf => now,                       # not before
+        :iat => now,                       # issued at
+        :jti => SecureRandom.uuid          # JWT ID
+      }
+    end
   end
 end
