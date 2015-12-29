@@ -6,8 +6,12 @@ module Hotel
     def initialize(config)
 
       @config = config
+      
+      opts = connection_options
+      
+      puts opts
 
-      @redis = Redis.new(connection_options)
+      @redis = Redis.new(opts)
     end
 
     # places a token in redis with the current
