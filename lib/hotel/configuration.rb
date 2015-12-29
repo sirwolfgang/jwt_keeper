@@ -13,7 +13,7 @@ module Hotel
     }
 
     # Creates a Configuration object with blank options
-    def initialize(params)
+    def initialize(params = {})
       super(DEFAULTS.merge(params))
     end
 

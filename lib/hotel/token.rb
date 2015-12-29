@@ -41,7 +41,7 @@ module Hotel
     def generate(user_claims)
       user_claims = { sub: user_claims } if user_claims.is_a?(String)
 
-      raise InvalidJwtError.new('No subject') if user_claims[:sub].nil
+      raise InvalidJwtError.new('No subject') if user_claims[:sub].nil?
 
       encode(user_claims)
     end
