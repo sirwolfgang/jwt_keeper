@@ -16,6 +16,9 @@ Hotel.configure do |config|
     #issuer:            'api.example.com',
 
     # the default audience of the tokens
-    #default_audience:  'example.com'
+    #default_audience:  'example.com',
+
+    # the location of redis config file
+    #redis_config: File.join(Rails.root, 'config', 'redis.yml')
   }
 end

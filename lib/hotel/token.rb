@@ -5,8 +5,9 @@ module Hotel
 
   class Token
 
-    def initialize(config)
+    def initialize(config, store)
       @config = config
+      @store = store
     end
 
     # Uses the TokenExpire
@@ -24,7 +25,7 @@ module Hotel
         raise InvalidJwtError.expired_token
       end
 
-      Store.expire(token, invalidation_expiry_for_token(token))
+      @store.expire(token, invalidation_expiry_for_token(token))
     end
 
     # For given claims generates
@@ -33,7 +34,13 @@ module Hotel
     # @param  user_claims
     # @return string
     def generate(user_claims)
-      return false unless user_claims.is_a?(Hash)
+      if user_claims.is_a?(String)
+        user_claims = { sub: user_claims }
+      end
+
+      if user_claims[:sub].nil?
+          raise InvalidJwtError.new('No subject')
+      end
 
       encode(user_claims)
     end
@@ -61,7 +68,7 @@ module Hotel
     # @return [true]
     def validate(jwt)
 
-      if Store.is_expired?(jwt)
+      if @store.is_expired?(jwt)
         raise InvalidJwtError.invalid_token
       end
 
@@ -130,7 +137,6 @@ module Hotel
 
       {
         :iss => @config.issuer,            # issuer
-        :sub => subject,                   # subject
         :aud => @config.audience,          # audience
         :exp => expires,                   # expiration time
         :nbf => now,                       # not before

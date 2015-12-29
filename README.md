@@ -17,7 +17,7 @@ development:
 *  u dun
 
 ## How invalidation happens
-JSON Web Tokens by nature cannot be invalidated, there are few methods
+[JSON Web Tokens](https://jwt.io/) by nature cannot be invalidated, there are few methods
 for rotating out compromised ones such as
 
 * shortening the time to expire
@@ -34,7 +34,7 @@ user permissions, and by being able to validate it without the need for any DB c
 Lastly tracking issued JWT's also makes no sense. The point of them is to be able
 to issue them to anything an android phone, a web browser, a toaster it doesn't matter.
 It's suppose to account for scaling so you're suppose to be able to issue as many as need be.
-Then authenticate them on any web head. Tracking issued ones just causes more DB lookups to 
+Then authenticate them on any web head. Tracking issued ones just causes more DB lookups to
 happen and the need for more database synchronization (running into the [CAP](https://en.wikipedia.org/wiki/CAP_theorem))
 </rant>
 

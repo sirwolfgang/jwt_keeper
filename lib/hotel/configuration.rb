@@ -5,29 +5,32 @@ module Hotel
   #
   # @attr [hash] options
   class Configuration
-    @@options
 
     attr_accessor :options
 
     # Creates a Configuration object with blank options
     def initialize
-      @@options = {}
+      @options = {}
     end
 
     def hashing_method
-      @@options.hashing_method
+      @options[:hashing_method]
     end
 
     def expiry
-      @@options.expiry
+      @options[:expiry]
     end
 
     def issuer
-      @@options.issuer
+      @options[:issuer]
     end
 
     def audience
-      @@options.default_audience
+      @options[:default_audience]
+    end
+
+    def redis_config
+      @options[:redis_config]
     end
   end
 end

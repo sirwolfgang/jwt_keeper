@@ -1,3 +1,5 @@
+require 'jwt'
+require 'redis'
 require 'hotel/configuration'
 require 'hotel/token'
 require 'hotel/store'
@@ -19,6 +21,6 @@ module Hotel
     self.configuration ||= Configuration.new
     yield(configuration)
 
-    self.markdown ||= Token.new(self.configuration)
+    self.token ||= Token.new(self.configuration, Store.new(self.configuration))
   end
 end
