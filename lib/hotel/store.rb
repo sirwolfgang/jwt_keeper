@@ -4,6 +4,9 @@ module Hotel
   # actions to set and get tokens in our store
   class Store
 
+    # The token store
+    #
+    # @param Hotel::Configuration config
     def initialize(config)
       @config = config
 
