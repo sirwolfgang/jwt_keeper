@@ -1,37 +1,34 @@
-Hotel
-=====
+# Hotel
 Helps you manage all of those keys you're giving out.
 
 [![Build Status](https://travis-ci.org/davidrivera/hotel.svg?branch=master)](https://travis-ci.org/davidrivera/hotel) [![Code Climate](https://codeclimate.com/github/davidrivera/hotel/badges/gpa.svg)](https://codeclimate.com/github/davidrivera/hotel) [![Inline docs](http://inch-ci.org/github/davidrivera/hotel.svg?branch=master)](http://inch-ci.org/github/davidrivera/hotel)
 
 ## Setup
-
- * run `rails g hotel:install`
- * edit the file found at `config/initializers/hotel.rb`
- * add a `config/redis.yml` keyed with the application environment, these options will be piped directly to `Redis.new`
+ - Add `gem 'hotel', git: 'https://github.com/davidrivera/hotel.git'` to Gemfile
+ - Run `rails generate hotel:install`
+ - Configure `config/initializers/hotel.rb`
+ - Configure `config/redis.yml` keyed with the application environment, these options will be piped directly to `Redis.new`
 ```
+# config/redis.yml
 production:
   ...
 development:
   ...
 ```
 
-*  u dun
+- Done
 
 ## Basic Usage
 Here are the basic methods you can call to perform various operations
 
-```rb
+```ruby
 Hotel.token.generate(your_custom_claim_hash)
 
 Hotel.token.invalidate(some_token)
-
 Hotel.token.refresh(token)
 
 Hotel.token.validate(token)
-
 Hotel.token.validate!(token)
-
 Hotel.token.valid?(token)
 ```
 

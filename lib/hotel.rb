@@ -17,6 +17,10 @@ module Hotel
 
   # static method to define a Configuration
   # object with the given initialized data
+  #
+  # @yield configuration for Hotel
+  # @yieldparam config
+  # @yieldreturn config
   def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)

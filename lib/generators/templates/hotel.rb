@@ -1,8 +1,3 @@
-# Hotel configuration
-#
-# @yield configuration for Hotel
-# @yieldparam config
-# @yieldreturn config
 Hotel.configure do |config|
   # The time to expire for the tokens
   # config.expiry =           24.hours

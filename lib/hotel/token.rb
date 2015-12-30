@@ -41,7 +41,7 @@ module Hotel
     def generate(user_claims)
       user_claims = { sub: user_claims } if user_claims.is_a?(String)
 
-      raise InvalidJwtError.new('No subject') if user_claims[:sub].nil?
+      fail(InvalidJwtError, 'No subject') if user_claims[:sub].nil?
 
       encode(user_claims)
     end
@@ -57,7 +57,7 @@ module Hotel
 
       invalidate(jwt)
 
-      user_claims = Hash[decoded.to_a - defaul_claims.to_a]
+      user_claims = Hash[decoded.to_a - default_claims.to_a]
 
       encode(user_claims)
     end
@@ -69,7 +69,7 @@ module Hotel
     # @raise InvalidJwtError
     # @return the decoded token
     def validate!(jwt)
-      raise InvalidJwtError.invalid_token if @store.expired?(jwt)
+      fail InvalidJwtError.invalid_token if @store.expired?(jwt)
 
       begin
         token = decode(jwt)
@@ -92,6 +92,7 @@ module Hotel
     def validate(jwt)
       validate!(jwt)
     rescue InvalidJwtError
+      nil
     end
 
     # For the given encoded JWT
@@ -100,7 +101,7 @@ module Hotel
     # @param jwt
     # @return bool
     def valid?(jwt)
-      true if validate!(jwt)
+      !validate!(jwt).nil?
     rescue InvalidJwtError
       false
     end
@@ -115,7 +116,7 @@ module Hotel
     def invalidation_expiry_for_token(token)
       date = DateTime.iso8601(token['exp'])
       expires = date - DateTime.now
-      ((expires) * 24 * 60 * 60).to_i
+      (expires * 24 * 60 * 60).to_i
     end
 
     # Facade for the JWT encode methods
@@ -148,23 +149,28 @@ module Hotel
     # @param Hash user_claims
     # @return a hash ready to be jwt encoded
     def payload(user_claims)
-      defaul_claims.merge(user_claims)
+      default_claims.merge(user_claims)
     end
 
     # Checks the claims of a token
     # @param String token the decoded token
     def validate_token_claims(token)
-      raise InvalidJwtError.early_token if token['nbf'] > Time.now
+      case
+      when token['nbf'] > Time.now
+        fail InvalidJwtError.early_token
 
-      raise InvalidJwtError.bad_issuer if token['iss'] != @config.issuer
+      when token['iss'] != @config.issuer
+        fail InvalidJwtError.bad_issuer
 
-      raise InvalidJwtError.lousy_audience if token['aud'] != @config.audience
+      when token['aud'] != @config.audience
+        fail InvalidJwtError.lousy_audience
+      end
     end
 
     # The default claims
     #
     # @return a hash of the claims
-    def defaul_claims
+    def default_claims
       expires = @config.expiry.from_now.iso8601
       now = DateTime.now.iso8601
 
