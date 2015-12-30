@@ -139,7 +139,7 @@ module Hotel
     #
     # @return the jwt secret
     def secret
-      Rails.application.secrets[:jwt_secret]
+      Rails.application.secrets[:secret_key_base]
     end
 
     # Given given the user claims produces a token object
