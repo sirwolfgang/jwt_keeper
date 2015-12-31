@@ -1,4 +1,4 @@
-Hotel.configure do |config|
+Keeper.configure do |config|
   # The time to expire for the tokens
   # config.expiry           = 24.hours
 

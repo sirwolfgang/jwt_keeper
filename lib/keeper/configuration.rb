@@ -1,4 +1,4 @@
-module Hotel
+module Keeper
   class Configuration < OpenStruct
     DEFAULTS = {
       algorithm:       'HS512',

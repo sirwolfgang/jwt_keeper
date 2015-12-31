@@ -1,4 +1,4 @@
-module Hotel
+module Keeper
   # The token is invalid
   class InvalidTokenError < StandardError; end
 

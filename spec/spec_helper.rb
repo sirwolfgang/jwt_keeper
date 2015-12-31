@@ -6,7 +6,7 @@ SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 SimpleCov.start
 
 require 'rails'
-require 'hotel'
+require 'keeper'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

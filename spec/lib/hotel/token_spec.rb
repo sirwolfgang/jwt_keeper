@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Hotel do
+RSpec.describe Keeper do
   describe 'Token' do
     let(:test_config) do
       {
@@ -16,7 +16,7 @@ RSpec.describe Hotel do
     let(:raw_token)      { described_class.create(private_claims) }
 
     before(:each) do
-      Hotel.configure(Hotel::Configuration.new(test_config))
+      Keeper.configure(Keeper::Configuration.new(test_config))
     end
 
     describe '#create' do
@@ -94,7 +94,7 @@ RSpec.describe Hotel do
         end
 
         it 'raises InvalidTokenError' do
-          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Hotel::InvalidTokenError
+          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Keeper::InvalidTokenError
         end
       end
 
@@ -102,7 +102,7 @@ RSpec.describe Hotel do
         let(:raw_token) { described_class.create(private_claims.merge(exp: DateTime.now.to_time.to_i - 1)) }
 
         it 'raises ExpiredTokenError' do
-          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Hotel::ExpiredTokenError
+          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Keeper::ExpiredTokenError
         end
       end
 
@@ -110,7 +110,7 @@ RSpec.describe Hotel do
         let(:raw_token) { described_class.create(private_claims.merge(nbf: DateTime.now.to_time.to_i + 100)) }
 
         it 'raises EarlyTokenError' do
-          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Hotel::EarlyTokenError
+          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Keeper::EarlyTokenError
         end
       end
 
@@ -118,7 +118,7 @@ RSpec.describe Hotel do
         let(:raw_token) { described_class.create(private_claims.merge(iss: 'wrong')) }
 
         it 'raises BadIssuerError' do
-          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Hotel::BadIssuerError
+          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Keeper::BadIssuerError
         end
       end
 
@@ -126,7 +126,7 @@ RSpec.describe Hotel do
         let(:raw_token) { described_class.create(private_claims.merge(aud: 'wrong')) }
 
         it 'raises LousyAudienceError' do
-          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Hotel::LousyAudienceError
+          expect { described_class.decode_and_validate!(raw_token) }.to raise_error Keeper::LousyAudienceError
         end
       end
     end
@@ -150,7 +150,7 @@ RSpec.describe Hotel do
     describe '#valid?' do
       context 'when invalid' do
         before do
-          Hotel.configure(Hotel::Configuration.new(test_config.merge(expiry: -1.hours)))
+          Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours)))
         end
 
         it 'returns false' do
@@ -174,7 +174,7 @@ RSpec.describe Hotel do
 
       context 'when valid' do
         before do
-          Hotel.configure(Hotel::Configuration.new(test_config.merge(expiry: -1.hours)))
+          Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours)))
         end
 
         it 'returns false' do

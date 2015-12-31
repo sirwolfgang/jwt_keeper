@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'hotel/version'
+require 'keeper/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'hotel'
-  spec.version       = Hotel::VERSION
+  spec.name          = 'keeper'
+  spec.version       = Keeper::VERSION
   spec.authors       = ['David Rivera']
   spec.email         = ['david.r.rivera193@gmail.com']
   spec.summary       = 'JWT for Rails made easy'
-  spec.description   = 'it is a hotel'
-  spec.homepage      = 'https://github.com/davidrivera/hotel'
+  spec.description   = 'it is a keeper'
+  spec.homepage      = 'https://github.com/davidrivera/keeper'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")

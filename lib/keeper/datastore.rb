@@ -1,4 +1,4 @@
-module Hotel
+module Keeper
   module Datastore
     class << self
 
@@ -16,12 +16,12 @@ module Hotel
 
       # @!visibility private
       def set_with_expiry(token, expire)
-        Hotel.configuration.redis_connection.setex(token, expire, DateTime.now)
+        Keeper.configuration.redis_connection.setex(token, expire, DateTime.now)
       end
 
       # @!visibility private
       def get(token)
-        Hotel.configuration.redis_connection.get(token)
+        Keeper.configuration.redis_connection.get(token)
       end
     end
   end

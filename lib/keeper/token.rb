@@ -1,4 +1,4 @@
-module Hotel
+module Keeper
   class << self
     # TODO: Move into an object
 

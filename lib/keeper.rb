@@ -1,12 +1,12 @@
 require 'jwt'
 require 'redis'
-require 'hotel/version'
-require 'hotel/exceptions'
-require 'hotel/configuration'
-require 'hotel/datastore'
-require 'hotel/token'
+require 'keeper/version'
+require 'keeper/exceptions'
+require 'keeper/configuration'
+require 'keeper/datastore'
+require 'keeper/token'
 
-module Hotel
+module Keeper
   class << self
     attr_reader :configuration, :datastore
   end
