@@ -20,12 +20,16 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 1.5'
   spec.add_development_dependency 'rake'
-  spec.add_development_dependency 'rspec', '~> 2.14'
   spec.add_development_dependency 'yard'
   spec.add_development_dependency 'mocha'
   spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'dotenv'
 
-  spec.add_dependency 'rails', '>= 3.1.0'
-  spec.add_dependency 'jwt', '>= 1.5'
+  spec.add_development_dependency 'rspec', '~> 2.14'
+  spec.add_development_dependency 'fuubar'
+  spec.add_development_dependency 'simplecov'
+
   spec.add_dependency 'redis'
+  spec.add_dependency 'rails', '>= 4.2'
+  spec.add_dependency 'jwt', '>= 1.5'
 end

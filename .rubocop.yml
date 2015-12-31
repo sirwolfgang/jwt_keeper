@@ -20,9 +20,3 @@ Style/PercentLiteralDelimiters:
     '%w': []
     '%W': []
     '%x': ()
-
-Style/EmptyLinesAroundClassBody:
-  EnforcedStyle: empty_lines
-
-Style/EmptyLinesAroundModuleBody:
-  EnforcedStyle: empty_lines

@@ -1,31 +1,22 @@
 require 'jwt'
 require 'redis'
-require 'hotel/configuration'
-require 'hotel/token'
-require 'hotel/store'
-require 'hotel/invalid_jwt_error'
 require 'hotel/version'
+require 'hotel/exceptions'
+require 'hotel/configuration'
+require 'hotel/datastore'
+require 'hotel/token'
 
-# This module encapsulates the functionality
-# for generating, retrieving, and validating an
-# auth token
-# @attr [Hotel::Configuration] the configuration
-# @attr [Hote::Token] a token instance
 module Hotel
-
-  attr_accessor :configuration, :token
-
-  # static method to define a Configuration
-  # object with the given initialized data
-  #
-  # @yield configuration for Hotel
-  # @yieldparam config
-  # @yieldreturn config
-  def self.configure
-    self.configuration ||= Configuration.new
-    yield(configuration)
-
-    self.token ||= Token.new(self.configuration, Store.new(self.configuration))
+  class << self
+    attr_reader :configuration, :datastore
   end
 
+  # Creates/sets a new configuration for the gem, yield a configuration object
+  # @param new_configuration [Configuration] new configuration
+  # @return [Configuration] the frozen configuration
+  def self.configure(new_configuration = Configuration.new)
+    yield(new_configuration) if block_given?
+
+    @configuration = new_configuration.freeze
+  end
 end

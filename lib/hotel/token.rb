@@ -1,189 +1,124 @@
-# This module encapsulates the functionality
-# for generating, retrieving, and validating an
-# auth token
 module Hotel
+  class << self
+    # TODO: Move into an object
 
-  #  This is a token
-  class Token
-
-    # Our token
-    #
-    # @param Hotel::Configuration config
-    # @param Hotel::Store store
-    def initialize(config, store)
-      @config = config
-      @store = store
+    # Creates a new web token
+    # @param private_claims [Hash] the custom claims to encode
+    # @return [String] encoded token
+    def create(private_claims)
+      encode(public_claims.merge(private_claims))
     end
 
-    # Uses the TokenExpire
-    # place the token in a
-    # blacklist
-    #
-    # @param token
-    # @return bool
-    def invalidate(token)
-      begin
-        decode_token(token)
-      rescue JWT::DecodeError
-        raise InvalidJwtError.invalid_token
-      rescue JWT::ExpiredSignature
-        raise InvalidJwtError.expired_token
-      end
-
-      @store.expire(token, invalidation_expiry_for_token(token))
+    # Revokes a web token
+    # @param raw_token [String] the raw token
+    # @return [Hash] decoded_token
+    def revoke(raw_token)
+      decoded_token = decode_and_validate!(raw_token)
+      Datastore.expire(raw_token, invalidation_expiry_for_token(decoded_token)) unless invalid?(raw_token)
+      decoded_token
     end
 
-    # For given claims generates
-    # an encoded JWT
-    #
-    # @param  user_claims
-    # @return string
-    def generate(user_claims)
-      user_claims = { sub: user_claims } if user_claims.is_a?(String)
-
-      fail(InvalidJwtError, 'No subject') if user_claims[:sub].nil?
-
-      encode(user_claims)
+    # Checks if a web token has been revoked
+    # @param raw_token [String] the raw token
+    # @return [Boolean]
+    def revoked?(raw_token)
+      Datastore.expired?(raw_token)
     end
 
-    # We need to refind the user and tokenize
-    # them again so we get accurate information
-    # if they updated any of the users info
-    #
-    # @param jwt
-    # @return string
-    def refresh(jwt)
-      decoded = validate(jwt)
-
-      invalidate(jwt)
-
-      user_claims = Hash[decoded.to_a - default_claims.to_a]
-
-      encode(user_claims)
+    # Revokes and creates a new web token
+    # @param raw_token [String] the raw token
+    # @return [String] encoded token
+    def rotate(raw_token)
+      decoded_token = decode_and_validate!(raw_token)
+      revoke(raw_token)
+      create(decoded_token)
     end
 
-    # For the given encoded JWT
-    # check to see if it is a valid token
-    #
-    # @param jwt
-    # @raise InvalidJwtError
-    # @return the decoded token
-    def validate!(jwt)
-      fail InvalidJwtError.invalid_token if @store.expired?(jwt)
+    # Decodes and validates a web token, raises token validation errors
+    # @param raw_token [String] the raw token
+    # @return [Hash] decoded token
+    def decode_and_validate!(raw_token)
+      decoded_token = decode!(raw_token)
 
-      begin
-        token = decode(jwt)
-      rescue JWT::DecodeError
-        raise InvalidJwtError.invalid_token
-      rescue JWT::ExpiredSignature
-        raise InvalidJwtError.expired_token
-      end
+      fail RevokedTokenError if revoked?(raw_token)
 
-      validate_token_claims(token)
+      decoded_token
 
-      token
+    rescue JWT::ExpiredSignature => e
+      raise ExpiredTokenError, e.message
+    rescue JWT::ImmatureSignature => e
+      raise EarlyTokenError, e.message
+    rescue JWT::InvalidIssuerError => e
+      raise BadIssuerError, e.message
+    rescue JWT::InvalidAudError => e
+      raise LousyAudienceError, e.message
+    rescue JWT::DecodeError => e
+      raise InvalidTokenError, e.message
     end
 
-    # For the given encoded JWT
-    # check to see if it is a valid token
-    #
-    # @param jwt
-    # @return the decoded token
-    def validate(jwt)
-      validate!(jwt)
-    rescue InvalidJwtError
+    # Decodes and validates a web token, returns nil if invalid
+    # @param raw_token [String] the raw token
+    # @return [Hash] decoded token
+    def decode_and_validate(raw_token)
+      decode_and_validate!(raw_token)
+    rescue InvalidTokenError
       nil
     end
 
-    # For the given encoded JWT
-    # check to see if it is a valid token
-    #
-    # @param jwt
-    # @return bool
-    def valid?(jwt)
-      !validate!(jwt).nil?
-    rescue InvalidJwtError
+    # Checks if the token valid?
+    # @param raw_token [String] the raw token
+    # @return [Boolean]
+    def valid?(raw_token)
+      !decode_and_validate!(raw_token).nil?
+    rescue InvalidTokenError
       false
+    end
+
+    # Checks if the token invalid?
+    # @param raw_token [String] the raw token
+    # @return [Boolean]
+    def invalid?(raw_token)
+      !valid?(raw_token)
     end
 
     private
 
-    # Generates an expiry date for out token
-    # for redis
-    #
-    # @param token the decoded token
-    # @return the expiry in seconds
-    def invalidation_expiry_for_token(token)
-      date = DateTime.iso8601(token['exp'])
-      expires = date - DateTime.now
-      (expires * 24 * 60 * 60).to_i
+    # @!visibility private
+    def invalidation_expiry_for_token(decoded_token)
+      decoded_token['exp'].to_i - DateTime.now.to_time.to_i
     end
 
-    # Facade for the JWT encode methods
-    #
-    # @param Hash claims
-    # @return the encoded token
+    # @!visibility private
     def encode(claims)
-      JWT.encode(payload(claims), secret, @config.hashing_method)
+      JWT.encode(claims, self.configuration.secret, self.configuration.algorithm)
     end
 
-    # Facade for the JWT decode method
-    #
-    # @param String token
-    # @return the decoded token
-    def decode(token)
-      JWT.decode(token, secret).first
+    # @!visibility private
+    def decode!(raw_token)
+      JWT.decode(raw_token, self.configuration.secret, true,
+        algorithm: self.configuration.algorithm,
+        verify_iss: true,
+        verify_aud: true,
+        verify_iat: true,
+        verify_sub: false,
+        verify_jti: false,
+        leeway: 0,
+
+        iss: self.configuration.issuer,
+        aud: self.configuration.audience
+      ).first
     end
 
-    # Gets the jwt secret from the
-    # application secrets
-    #
-    # @return the jwt secret
-    def secret
-      Rails.application.secrets[:secret_key_base]
-    end
-
-    # Given given the user claims produces a token object
-    # to be issued
-    #
-    # @param Hash user_claims
-    # @return a hash ready to be jwt encoded
-    def payload(user_claims)
-      default_claims.merge(user_claims)
-    end
-
-    # Checks the claims of a token
-    # @param String token the decoded token
-    def validate_token_claims(token)
-      case
-      when token['nbf'] > Time.now
-        fail InvalidJwtError.early_token
-
-      when token['iss'] != @config.issuer
-        fail InvalidJwtError.bad_issuer
-
-      when token['aud'] != @config.audience
-        fail InvalidJwtError.lousy_audience
-      end
-    end
-
-    # The default claims
-    #
-    # @return a hash of the claims
-    def default_claims
-      expires = @config.expiry.from_now.iso8601
-      now = DateTime.now.iso8601
-
+    # @!visibility private
+    def public_claims
       {
-        iss: @config.issuer,            # issuer
-        aud: @config.default_audience,  # audience
-        exp: expires,                   # expiration time
-        nbf: now,                       # not before
-        iat: now,                       # issued at
-        jti: SecureRandom.uuid          # JWT ID
+        iss: self.configuration.issuer,                       # issuer
+        aud: self.configuration.audience,                     # audience
+        exp: self.configuration.expiry.from_now.to_time.to_i, # expiration time
+        nbf: DateTime.now.to_time.to_i,                       # not before
+        iat: DateTime.now.to_time.to_i,                       # issued at
+        jti: SecureRandom.uuid                                # JWT ID
       }
     end
-
   end
-
 end

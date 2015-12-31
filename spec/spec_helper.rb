@@ -1,3 +1,10 @@
+require 'dotenv'
+Dotenv.load
+
+require 'simplecov'
+SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+SimpleCov.start
+
 require 'rails'
 require 'hotel'
 
