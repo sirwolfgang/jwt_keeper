@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Hotel do
+RSpec.describe Hotel do
   describe 'Token' do
     let(:test_config) do
       {
