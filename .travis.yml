@@ -2,3 +2,8 @@ language: ruby
 rvm:
   - 2.2.1
   - ruby-head
+services:
+  - redis-server
+env:
+  global:
+    - REDIS_URL=redis://localhost:6379
