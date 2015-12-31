@@ -22,14 +22,14 @@ development:
 Here are the basic methods you can call to perform various operations
 
 ```ruby
-Hotel.token.generate(your_custom_claim_hash)
+Hotel.token.generate(private_claim_hash)
 
-Hotel.token.invalidate(some_token)
-Hotel.token.refresh(token)
+Hotel.token.revoke(raw_token)
+Hotel.token.rotate(raw_token)
 
-Hotel.token.validate(token)
-Hotel.token.validate!(token)
-Hotel.token.valid?(token)
+Hotel.token.decode_and_validate(raw_token)
+Hotel.token.decode_and_validate!(raw_token)
+Hotel.token.valid?(raw_token)
 ```
 
 ## How invalidation happens
