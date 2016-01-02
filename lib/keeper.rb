@@ -5,6 +5,7 @@ require 'keeper/exceptions'
 require 'keeper/configuration'
 require 'keeper/datastore'
 require 'keeper/token'
+require 'keeper/controller'
 
 module Keeper
   class << self

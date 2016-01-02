@@ -1,7 +1,6 @@
 module Keeper
   module Datastore
     class << self
-
       # @!visibility private
       def expire(token, time)
         set_with_expiry(token, time)

@@ -182,54 +182,5 @@ RSpec.describe Keeper do
         end
       end
     end
-
   end
 end
-
-#
-# def rotate(token)
-#   decoded_token = validate!(token)
-#   revoke(token)
-#   create(decoded_token)
-# end
-#
-# def validate!(token)
-#   decoded_token = decode!(token)
-#
-#   fail RevokedTokenError if revoked?(token)
-#
-#   decoded_token
-#
-# rescue JWT::DecodeError
-#   raise InvalidTokenError
-# rescue JWT::ExpiredSignature
-#   raise ExpiredTokenError
-# rescue JWT::ImmatureSignature
-#   raise EarlyTokenError
-# rescue JWT::InvalidIssuerError
-#   raise BadIssuerError
-# rescue JWT::InvalidAudError
-#   raise LousyAudienceError
-# rescue JWT::InvalidJtiError
-#   raise InvalidTokenError
-# rescue JWT::InvalidIatError
-#   raise InvalidTokenError
-# rescue JWT::InvalidSubError
-#   raise InvalidTokenError
-# end
-#
-# def validate(token)
-#   validate!(token)
-# rescue InvalidTokenError
-#   nil
-# end
-#
-# def valid?(token)
-#   !validate!(token).nil?
-# rescue Error
-#   false
-# end
-#
-# def invalid?(token)
-#   !valid?
-# end

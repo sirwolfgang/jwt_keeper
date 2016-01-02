@@ -90,34 +90,34 @@ module Keeper
 
     # @!visibility private
     def encode(claims)
-      JWT.encode(claims, self.configuration.secret, self.configuration.algorithm)
+      JWT.encode(claims, configuration.secret, configuration.algorithm)
     end
 
     # @!visibility private
     def decode!(raw_token)
-      JWT.decode(raw_token, self.configuration.secret, true,
-        algorithm: self.configuration.algorithm,
-        verify_iss: true,
-        verify_aud: true,
-        verify_iat: true,
-        verify_sub: false,
-        verify_jti: false,
-        leeway: 0,
+      JWT.decode(raw_token, configuration.secret, true,
+                 algorithm: configuration.algorithm,
+                 verify_iss: true,
+                 verify_aud: true,
+                 verify_iat: true,
+                 verify_sub: false,
+                 verify_jti: false,
+                 leeway: 0,
 
-        iss: self.configuration.issuer,
-        aud: self.configuration.audience
-      ).first
+                 iss: configuration.issuer,
+                 aud: configuration.audience
+                ).first
     end
 
     # @!visibility private
     def public_claims
       {
-        iss: self.configuration.issuer,                       # issuer
-        aud: self.configuration.audience,                     # audience
-        exp: self.configuration.expiry.from_now.to_time.to_i, # expiration time
-        nbf: DateTime.now.to_time.to_i,                       # not before
-        iat: DateTime.now.to_time.to_i,                       # issued at
-        jti: SecureRandom.uuid                                # JWT ID
+        iss: configuration.issuer,                       # issuer
+        aud: configuration.audience,                     # audience
+        exp: configuration.expiry.from_now.to_time.to_i, # expiration time
+        nbf: DateTime.now.to_time.to_i,                  # not before
+        iat: DateTime.now.to_time.to_i,                  # issued at
+        jti: SecureRandom.uuid                           # JWT ID
       }
     end
   end
