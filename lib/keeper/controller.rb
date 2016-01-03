@@ -21,7 +21,8 @@ module Keeper
       end
 
       def request_raw_token
-        request.headers['Authorization'][/[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]+/]
+        auth = request.headers['Authorization'] || ''
+        auth[/[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]+/]
       end
 
       # used when a user tries to access a page while logged out, is asked to login,

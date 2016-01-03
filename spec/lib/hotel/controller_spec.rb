@@ -19,7 +19,7 @@ RSpec.describe Keeper do
 
     subject(:test_controller) do
       instance = Class.new do
-        attr_accessor :private_claims
+        attr_accessor :request
         include RSpec::Mocks::ExampleMethods
         include Keeper::Controller
 
@@ -33,17 +33,8 @@ RSpec.describe Keeper do
 
         def redirect_to(path, message = nil)
         end
-
-        def request
-          @request ||= instance_double('Request',
-                                       headers: instance_double('Headers',
-                                                                :[] => "Bearer #{Keeper.create(private_claims)}"
-                                                               )
-                                      )
-        end
       end.new
-
-      instance.private_claims = { claim: "Jet fuel can't melt steel beams" }
+      instance.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(claim: "Jet fuel can't melt steel beams")}"))
       instance
     end
 
@@ -68,7 +59,7 @@ RSpec.describe Keeper do
       end
       context 'invalid request in token' do
         before do
-          subject.private_claims = { exp: 3.hours.ago }
+          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(exp: 3.hours.ago)}"))
           allow(test_controller).to receive(:not_authenticated)
         end
 
@@ -87,7 +78,7 @@ RSpec.describe Keeper do
       end
       context 'no token in request' do
         before do
-          subject.private_claims = { exp: 3.hours.ago }
+          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(exp: 3.hours.ago)}"))
         end
 
         it 'returns nil' do
@@ -97,8 +88,20 @@ RSpec.describe Keeper do
     end
 
     describe '.request_raw_token' do
-      it 'returns the raw token' do
-        expect(subject.request_raw_token).to be_instance_of String
+      context 'without header' do
+        before do
+          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => nil))
+        end
+
+        it 'returns nil' do
+          expect(subject.request_raw_token).to be nil
+        end
+      end
+
+      context 'with header' do
+        it 'returns the raw token' do
+          expect(subject.request_raw_token).to be_instance_of String
+        end
       end
     end
 
