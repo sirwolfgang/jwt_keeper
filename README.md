@@ -1,5 +1,5 @@
 # Keeper
-Helps you manage all of those keys you're giving out.
+An managing interface layer for handling the creation and validation of JWTs.
 
 ## Setup
  - Add `gem 'keeper', git: 'https://github.com/hive-xyz/keeper.git'` to Gemfile
