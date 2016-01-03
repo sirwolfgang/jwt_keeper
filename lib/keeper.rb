@@ -20,4 +20,6 @@ module Keeper
 
     @configuration = new_configuration.freeze
   end
+
+  require 'keeper/engine' if defined?(Rails)
 end
