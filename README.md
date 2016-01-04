@@ -1,4 +1,9 @@
 # Keeper
+[![Build Status](https://img.shields.io/travis/hive-xyz/keeper/master.svg)](https://travis-ci.org/hive-xyz/keeper)
+[![Dependency Status](https://img.shields.io/gemnasium/hive-xyz/keeper.svg)](https://gemnasium.com/hive-xyz/keeper)
+[![Code Climate](https://img.shields.io/codeclimate/github/5689f669c569b53e070016f3/7442b2061513a26960de.svg)](https://codeclimate.com/repos/5689f669c569b53e070016f3/feed)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/5689f669c569b53e070016f3/7442b2061513a26960de.svg)](https://codeclimate.com/repos/5689f669c569b53e070016f3/coverage)
+
 An managing interface layer for handling the creation and validation of JWTs.
 
 ## Setup
