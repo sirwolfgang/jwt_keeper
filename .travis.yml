@@ -1,7 +1,17 @@
 language: ruby
 rvm:
-  - 2.2.1
+  - 1.9.3
+  - 2.0.0
+  - 2.1.8
+  - 2.2.4
+  - 2.3.0
   - ruby-head
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+addons:
+  code_climate:
+    repo_token: f337d3f4f1e22f0eda159e18852b13cdaca525459ce94284e0c4b33cce02d888
 services:
   - redis-server
 env:
