@@ -2,7 +2,12 @@ require 'dotenv'
 Dotenv.load
 
 require 'simplecov'
-SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
+require 'codeclimate-test-reporter'
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
+  SimpleCov::Formatter::HTMLFormatter,
+  CodeClimate::TestReporter::Formatter
+])
 SimpleCov.start
 
 require 'rails'
