@@ -1,102 +1,91 @@
 module Keeper
-  class << self
-    # TODO: Move into an object
+  class Token
+    attr_accessor :claims
+
+    # Initalizes a new web token
+    # @param private_claims [Hash] the custom claims to encode
+    def initialize(private_claims = {})
+      @claims = {
+        iss: Keeper.configuration.issuer,               # issuer
+        aud: Keeper.configuration.audience,             # audience
+        exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
+        nbf: DateTime.now.to_i,                         # not before
+        iat: DateTime.now.to_i,                         # issued at
+        jti: SecureRandom.uuid                          # JWT ID
+      }.merge(private_claims)
+    end
 
     # Creates a new web token
     # @param private_claims [Hash] the custom claims to encode
-    # @return [String] encoded token
-    def create(private_claims)
-      encode(public_claims.merge(private_claims))
+    # @return [Token] token object
+    def self.create(private_claims)
+      new(private_claims)
+    end
+
+    # Decodes and validates an existing token
+    # @param raw_token [String] the raw token
+    # @return [Token] token object
+    def self.find(raw_token)
+      claims = decode(raw_token)
+      return nil if claims.nil?
+
+      new_token = new(claims)
+      return nil if new_token.revoked?
+      new_token
     end
 
     # Revokes a web token
-    # @param raw_token [String] the raw token
-    # @return [Hash] decoded_token
-    def revoke(raw_token)
-      decoded_token = decode_and_validate!(raw_token)
-      Datastore.expire(raw_token, invalidation_expiry_for_token(decoded_token)) unless invalid?(raw_token)
-      decoded_token
+    def revoke
+      return if invalid?
+      Datastore.expire(claims[:jti], claims[:exp] - DateTime.now.to_i)
     end
 
     # Checks if a web token has been revoked
-    # @param raw_token [String] the raw token
     # @return [Boolean]
-    def revoked?(raw_token)
-      Datastore.expired?(raw_token)
+    def revoked?
+      Datastore.expired?(claims[:jti])
     end
 
     # Revokes and creates a new web token
-    # @param raw_token [String] the raw token
-    # @return [String] encoded token
-    def rotate(raw_token)
-      decoded_token = decode_and_validate!(raw_token)
-      revoke(raw_token)
-      create(decoded_token)
-    end
+    # @return [String] new token
+    def rotate
+      revoke
 
-    # Decodes and validates a web token, raises token validation errors
-    # @param raw_token [String] the raw token
-    # @return [Hash] decoded token
-    def decode_and_validate!(raw_token)
-      decoded_token = decode!(raw_token)
-
-      fail RevokedTokenError if revoked?(raw_token)
-
-      decoded_token
-
-    rescue JWT::ExpiredSignature => e
-      raise ExpiredTokenError, e.message
-    rescue JWT::ImmatureSignature => e
-      raise EarlyTokenError, e.message
-    rescue JWT::InvalidIssuerError => e
-      raise BadIssuerError, e.message
-    rescue JWT::InvalidAudError => e
-      raise LousyAudienceError, e.message
-    rescue JWT::DecodeError => e
-      raise InvalidTokenError, e.message
-    end
-
-    # Decodes and validates a web token, returns nil if invalid
-    # @param raw_token [String] the raw token
-    # @return [Hash] decoded token
-    def decode_and_validate(raw_token)
-      decode_and_validate!(raw_token)
-    rescue InvalidTokenError
-      nil
+      new_token = self.class.new(claims.except(:iss, :aud, :exp, :nbf, :iat, :jti))
+      @claims = new_token.claims
+      new_token
     end
 
     # Checks if the token valid?
-    # @param raw_token [String] the raw token
     # @return [Boolean]
-    def valid?(raw_token)
-      !decode_and_validate!(raw_token).nil?
-    rescue InvalidTokenError
-      false
+    def valid?
+      !invalid?
     end
 
     # Checks if the token invalid?
-    # @param raw_token [String] the raw token
     # @return [Boolean]
-    def invalid?(raw_token)
-      !valid?(raw_token)
+    def invalid?
+      self.class.decode(encode).nil? || revoked?
     end
+
+    # Encodes the jwt
+    # @return [String]
+    def to_jwt
+      encode
+    end
+    alias_method :to_s, :to_jwt
 
     private
 
     # @!visibility private
-    def invalidation_expiry_for_token(decoded_token)
-      decoded_token['exp'].to_i - DateTime.now.to_time.to_i
+    def encode
+      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
     end
 
     # @!visibility private
-    def encode(claims)
-      JWT.encode(claims, configuration.secret, configuration.algorithm)
-    end
-
-    # @!visibility private
-    def decode!(raw_token)
-      JWT.decode(raw_token, configuration.secret, true,
-                 algorithm: configuration.algorithm,
+    def self.decode(raw_token)
+      JWT.decode(raw_token, Keeper.configuration.secret, true,
+                 algorithm: Keeper.configuration.algorithm,
                  verify_iss: true,
                  verify_aud: true,
                  verify_iat: true,
@@ -104,21 +93,12 @@ module Keeper
                  verify_jti: false,
                  leeway: 0,
 
-                 iss: configuration.issuer,
-                 aud: configuration.audience
-                ).first
-    end
+                 iss: Keeper.configuration.issuer,
+                 aud: Keeper.configuration.audience
+                ).first.symbolize_keys
 
-    # @!visibility private
-    def public_claims
-      {
-        iss: configuration.issuer,                       # issuer
-        aud: configuration.audience,                     # audience
-        exp: configuration.expiry.from_now.to_time.to_i, # expiration time
-        nbf: DateTime.now.to_time.to_i,                  # not before
-        iat: DateTime.now.to_time.to_i,                  # issued at
-        jti: SecureRandom.uuid                           # JWT ID
-      }
+    rescue JWT::DecodeError
+      return nil
     end
   end
 end
