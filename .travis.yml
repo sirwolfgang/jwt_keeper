@@ -11,7 +11,7 @@ matrix:
     - rvm: ruby-head
 addons:
   code_climate:
-    repo_token: f337d3f4f1e22f0eda159e18852b13cdaca525459ce94284e0c4b33cce02d888
+    repo_token: 58672d781a735b0bac2541c57e6b2aa3ad6b2ad5b307338a9acbba3d80dca91c
 services:
   - redis-server
 env:
