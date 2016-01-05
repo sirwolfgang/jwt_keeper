@@ -6,11 +6,11 @@ require 'keeper/version'
 Gem::Specification.new do |spec|
   spec.name          = 'keeper'
   spec.version       = Keeper::VERSION
-  spec.authors       = ['David Rivera']
-  spec.email         = ['david.r.rivera193@gmail.com']
+  spec.authors       = ['David Rivera', 'Zane Wolfgang Pickett']
+  spec.email         = ['david.r.rivera193@gmail.com', 'Zane.Wolfgang.Pickett@Gmail.com']
   spec.summary       = 'JWT for Rails made easy'
-  spec.description   = 'it is a keeper'
-  spec.homepage      = 'https://github.com/davidrivera/keeper'
+  spec.description   = 'It is a keeper'
+  spec.homepage      = 'https://github.com/hive-xyz/keeper'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
