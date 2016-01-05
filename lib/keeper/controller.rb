@@ -17,7 +17,7 @@ module Keeper
       end
 
       def request_decoded_token
-        Keeper.decode_and_validate(request_raw_token)
+        Keeper::Token.find(request_raw_token)
       end
 
       def request_raw_token
@@ -38,7 +38,7 @@ module Keeper
         redirect_to root_path
       end
 
-      def authenticated(decoded_token)
+      def authenticated(token)
       end
     end
   end
