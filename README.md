@@ -16,14 +16,14 @@ An managing interface layer for handling the creation and validation of JWTs.
 Here are the basic methods you can call to perform various operations
 
 ```ruby
-Keeper.token.generate(private_claim_hash)
+token = Keeper::Token.create(private_claim_hash)
+token = Keeper::Token.find(raw_token_string)
 
-Keeper.token.revoke(raw_token)
-Keeper.token.rotate(raw_token)
+token.revoke
+token.rotate
 
-Keeper.token.decode_and_validate(raw_token)
-Keeper.token.decode_and_validate!(raw_token)
-Keeper.token.valid?(raw_token)
+token.valid?
+raw_token_string = token.to_jwt
 ```
 
 ## Motivation
