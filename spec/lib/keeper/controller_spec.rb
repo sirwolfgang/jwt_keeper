@@ -34,7 +34,7 @@ RSpec.describe Keeper do
         def redirect_to(path, message = nil)
         end
       end.new
-      instance.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(claim: "Jet fuel can't melt steel beams")}"))
+      instance.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper::Token.create(claim: "Jet fuel can't melt steel beams")}"))
       instance
     end
 
@@ -59,7 +59,7 @@ RSpec.describe Keeper do
       end
       context 'invalid request in token' do
         before do
-          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(exp: 3.hours.ago)}"))
+          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper::Token.create(exp: 3.hours.ago)}"))
           allow(test_controller).to receive(:not_authenticated)
         end
 
@@ -73,12 +73,12 @@ RSpec.describe Keeper do
     describe '.request_decoded_token' do
       context 'valid request in token' do
         it 'returns the decoded token from the current request' do
-          expect(subject.request_decoded_token['claim']).to eq "Jet fuel can't melt steel beams"
+          expect(subject.request_decoded_token.claims[:claim]).to eq "Jet fuel can't melt steel beams"
         end
       end
       context 'no token in request' do
         before do
-          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper.create(exp: 3.hours.ago)}"))
+          subject.request = instance_double('Request', headers: instance_double('Headers', :[] => "Bearer #{Keeper::Token.create(exp: 3.hours.ago)}"))
         end
 
         it 'returns nil' do
