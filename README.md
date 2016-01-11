@@ -3,6 +3,7 @@
 [![Dependency Status](https://img.shields.io/gemnasium/hive-xyz/keeper.svg)](https://gemnasium.com/hive-xyz/keeper)
 [![Code Climate](https://img.shields.io/codeclimate/github/hive-xyz/keeper.svg)](https://codeclimate.com/github/hive-xyz/keeper)
 [![Test Coverage](https://img.shields.io/codeclimate/coverage/github/hive-xyz/keeper.svg)](https://codeclimate.com/github/hive-xyz/keeper/coverage)
+[![Inline docs](http://inch-ci.org/github/hive-xyz/keeper.svg?style=shields)](http://inch-ci.org/github/hive-xyz/keeper)
 
 An managing interface layer for handling the creation and validation of JWTs.
 
