@@ -16,3 +16,5 @@ services:
 env:
   global:
     - REDIS_URL=redis://localhost:6379
+notifications:
+  email: false
