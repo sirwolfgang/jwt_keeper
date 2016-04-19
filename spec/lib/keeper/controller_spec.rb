@@ -2,20 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Keeper do
   describe 'Controller' do
-    let(:test_config) do
-      {
-        algorithm:        'HS256',
-        secret:           'secret',
-        expiry:           24.hours,
-        issuer:           'api.example.com',
-        audience:         'example.com',
-        redis_connection: Redis.new(url: ENV['REDIS_URL'])
-      }
-    end
-
-    before(:each) do
-      Keeper.configure(Keeper::Configuration.new(test_config))
-    end
+    include_context 'initialize config'
 
     subject(:test_controller) do
       instance = Class.new do

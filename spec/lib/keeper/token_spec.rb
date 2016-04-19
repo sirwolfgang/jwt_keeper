@@ -2,22 +2,9 @@ require 'spec_helper'
 
 module Keeper
   RSpec.describe Token do
-    let(:test_config) do
-      {
-        algorithm:        'HS256',
-        secret:           'secret',
-        expiry:           24.hours,
-        issuer:           'api.example.com',
-        audience:         'example.com',
-        redis_connection: Redis.new(url: ENV['REDIS_URL'])
-      }
-    end
+    include_context 'initialize config'
     let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
     let(:raw_token)      { described_class.create(private_claims).to_jwt }
-
-    before(:each) do
-      Keeper.configure(Keeper::Configuration.new(test_config))
-    end
 
     describe '#create' do
       subject { described_class.create(private_claims) }

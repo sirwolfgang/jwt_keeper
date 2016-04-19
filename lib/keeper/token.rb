@@ -37,13 +37,13 @@ module Keeper
     # Revokes a web token
     def revoke
       return if invalid?
-      Datastore.expire(claims[:jti], claims[:exp] - DateTime.now.to_i)
+      Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
     end
 
     # Checks if a web token has been revoked
     # @return [Boolean]
     def revoked?
-      Datastore.expired?(claims[:jti])
+      Datastore.revoked?(claims[:jti])
     end
 
     # Revokes and creates a new web token

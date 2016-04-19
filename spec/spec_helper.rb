@@ -38,3 +38,20 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 end
+
+RSpec.shared_context 'initialize config' do
+  let(:test_config) do
+    {
+      algorithm:        'HS256',
+      secret:           'secret',
+      expiry:           24.hours,
+      issuer:           'api.example.com',
+      audience:         'example.com',
+      redis_connection: Redis.new(url: ENV['REDIS_URL'])
+    }
+  end
+
+  before(:each) do
+    Keeper.configure(Keeper::Configuration.new(test_config))
+  end
+end
