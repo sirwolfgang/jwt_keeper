@@ -6,14 +6,14 @@ module Keeper
     let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
     let(:raw_token)      { described_class.create(private_claims).to_jwt }
 
-    describe '#create' do
+    describe '.create' do
       subject { described_class.create(private_claims) }
 
       it { is_expected.to be_instance_of described_class }
       it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
     end
 
-    describe '#find' do
+    describe '.find' do
       subject { described_class.find(raw_token) }
 
       it { is_expected.to be_instance_of described_class }
@@ -32,7 +32,16 @@ module Keeper
       end
     end
 
-    describe '.revoke' do
+    describe '.rotate' do
+      subject(:token) { described_class.create(private_claims) }
+      before(:each) { described_class.rotate(token.claims[:jti]) }
+
+      it 'marks the token for rotation' do
+        expect(token.pending?).to eq true
+      end
+    end
+
+    describe '#revoke' do
       subject(:token) { described_class.create(private_claims) }
 
       it 'invalidates the token' do
@@ -49,14 +58,40 @@ module Keeper
     describe '#revoked?' do
       subject(:token) { described_class.create(private_claims) }
 
-      context 'when token has been revoked' do
+      context 'with a revoked token' do
         before { token.revoke }
 
         it { is_expected.to be_revoked }
       end
 
-      context 'when token is valid' do
+      context 'with a pending token' do
+        before { described_class.rotate(token.claims[:jti]) }
+
         it { is_expected.not_to be_revoked }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_revoked }
+      end
+    end
+
+    describe '#pending?' do
+      subject(:token) { described_class.create(private_claims) }
+
+      context 'with a revoked token' do
+        before { token.revoke }
+
+        it { is_expected.not_to be_pending }
+      end
+
+      context 'with a pending token' do
+        before { described_class.rotate(token.claims[:jti]) }
+
+        it { is_expected.to be_pending }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_pending }
       end
     end
 
@@ -70,7 +105,7 @@ module Keeper
       it { expect(old_token.claims[:claim]).to eq new_token.claims[:claim] }
     end
 
-    describe '.valid?' do
+    describe '#valid?' do
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do
@@ -83,7 +118,7 @@ module Keeper
       end
     end
 
-    describe '.invalid?' do
+    describe '#invalid?' do
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do

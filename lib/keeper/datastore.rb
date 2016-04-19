@@ -7,14 +7,14 @@ module Keeper
       end
 
       # @!visibility private
-      def pending?(jti)
-        value = get(jti)
-        value.present? && value.to_sym == :soft
+      def revoke(jti, seconds)
+        set_with_expiry(jti, seconds, :hard)
       end
 
       # @!visibility private
-      def revoke(jti, seconds)
-        set_with_expiry(jti, seconds, :hard)
+      def pending?(jti)
+        value = get(jti)
+        value.present? && value.to_sym == :soft
       end
 
       # @!visibility private

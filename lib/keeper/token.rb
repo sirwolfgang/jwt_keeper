@@ -34,16 +34,18 @@ module Keeper
       new_token
     end
 
+    # Sets a token to the pending rotation state. The expire is set to the maxium possible time but
+    # is inherently ignored by the token's exp check and then rewritten with the revokation on
+    # rotate.
+    # @param token_jti [String] the token unique id
+    def self.rotate(token_id)
+      Datastore.rotate(token_id, Keeper.configuration.expiry.from_now.to_i)
+    end
+
     # Revokes a web token
     def revoke
       return if invalid?
       Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
-    end
-
-    # Checks if a web token has been revoked
-    # @return [Boolean]
-    def revoked?
-      Datastore.revoked?(claims[:jti])
     end
 
     # Revokes and creates a new web token
@@ -54,6 +56,18 @@ module Keeper
       new_token = self.class.new(claims.except(:iss, :aud, :exp, :nbf, :iat, :jti))
       @claims = new_token.claims
       new_token
+    end
+
+    # Checks if a web token has been revoked
+    # @return [Boolean]
+    def revoked?
+      Datastore.revoked?(claims[:jti])
+    end
+
+    # Checks if a web token is pending a rotation
+    # @return [Boolean]
+    def pending?
+      Datastore.pending?(claims[:jti])
     end
 
     # Checks if the token valid?
