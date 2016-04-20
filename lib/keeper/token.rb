@@ -49,13 +49,15 @@ module Keeper
     end
 
     # Revokes and creates a new web token
+    # @param new_claims [Hash] Used to override and update claims during rotation
     # @return [String] new token
-    def rotate
+    def rotate(new_claims = nil)
       revoke
 
-      new_token = self.class.new(claims.except(:iss, :aud, :exp, :nbf, :iat, :jti))
+      new_claims ||= claims.except(:iss, :aud, :exp, :nbf, :iat, :jti)
+      new_token = self.class.new(new_claims)
       @claims = new_token.claims
-      new_token
+      self
     end
 
     # Checks if a web token has been revoked
@@ -87,14 +89,7 @@ module Keeper
     def to_jwt
       encode
     end
-    alias_method :to_s, :to_jwt
-
-    private
-
-    # @!visibility private
-    def encode
-      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
-    end
+    alias to_s to_jwt
 
     # @!visibility private
     def self.decode(raw_token)
@@ -113,6 +108,13 @@ module Keeper
 
     rescue JWT::DecodeError
       return nil
+    end
+
+    private
+
+    # @!visibility private
+    def encode
+      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
     end
   end
 end

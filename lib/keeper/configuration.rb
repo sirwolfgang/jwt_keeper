@@ -7,7 +7,7 @@ module Keeper
       issuer:           'api.example.com',
       audience:         'example.com',
       redis_connection: nil
-    }
+    }.freeze
 
     # Creates a new Configuration from the passed in parameters
     # @param params [Hash] configuration options

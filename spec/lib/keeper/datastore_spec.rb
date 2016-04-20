@@ -59,7 +59,6 @@ RSpec.describe Keeper::Datastore do
       end
     end
 
-
     context 'with a pending token' do
       before { described_class.rotate(jti, 30) }
 

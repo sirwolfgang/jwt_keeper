@@ -7,22 +7,35 @@ module Keeper
     end
 
     module InstanceMethods
+      JWT_REGEX = /[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]+/
+
       def require_authentication
-        decoded_token = request_decoded_token
-        if decoded_token.nil?
-          not_authenticated
-        else
-          authenticated(decoded_token)
+        token = authentication_token
+        return not_authenticated if token.nil?
+
+        if token.pending?
+          token.rotate(regenerate_claims)
+          self.authentication_token = token
         end
+
+        authenticated(token)
       end
 
-      def request_decoded_token
-        Keeper::Token.find(request_raw_token)
+      def regenerate_claims
+        nil
       end
 
-      def request_raw_token
-        auth = request.headers['Authorization'] || ''
-        auth[/[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]+/]
+      def respond_with_authentication
+        response.headers['Authorization'] = request.headers['Authorization']
+      end
+
+      def authentication_token
+        return nil unless request.headers['Authorization']
+        Keeper::Token.find(request.headers['Authorization'][JWT_REGEX])
+      end
+
+      def authentication_token=(token)
+        request.headers['Authorization'] = "Bearer #{token.to_jwt}"
       end
 
       # used when a user tries to access a page while logged out, is asked to login,
