@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Keeper
+module JWTKeeper
   RSpec.describe Token do
     include_context 'initialize config'
     let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
@@ -155,7 +155,7 @@ module Keeper
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do
-        before { Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
+        before { JWTKeeper.configure(JWTKeeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
         it { is_expected.not_to be_valid }
       end
 
@@ -168,7 +168,7 @@ module Keeper
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do
-        before { Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
+        before { JWTKeeper.configure(JWTKeeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
         it { is_expected.to be_invalid }
       end
 

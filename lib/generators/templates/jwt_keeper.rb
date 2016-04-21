@@ -1,4 +1,4 @@
-Keeper.configure do |config|
+JWTKeeper.configure do |config|
   # The time to expire for the tokens
   # config.expiry           = 24.hours
 

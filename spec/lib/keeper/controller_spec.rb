@@ -1,15 +1,15 @@
 require 'spec_helper'
 
-RSpec.describe Keeper do
+RSpec.describe JWTKeeper do
   describe 'Controller' do
     include_context 'initialize config'
 
-    let(:token) { Keeper::Token.create(claim: "Jet fuel can't melt steel beams") }
+    let(:token) { JWTKeeper::Token.create(claim: "Jet fuel can't melt steel beams") }
     subject(:test_controller) do
       instance = Class.new do
         attr_accessor :request, :response
         include RSpec::Mocks::ExampleMethods
-        include Keeper::Controller
+        include JWTKeeper::Controller
 
         def session
           { return_to_url: 'http://www.example.com' }
@@ -62,7 +62,7 @@ RSpec.describe Keeper do
       end
 
       context 'with expired token' do
-        let(:token) { Keeper::Token.create(exp: 3.hours.ago) }
+        let(:token) { JWTKeeper::Token.create(exp: 3.hours.ago) }
         before do
           allow(test_controller).to receive(:not_authenticated)
         end
@@ -75,8 +75,8 @@ RSpec.describe Keeper do
 
       context 'with pending token' do
         let(:token) do
-          token = Keeper::Token.create({})
-          Keeper::Token.rotate(token.id)
+          token = JWTKeeper::Token.create({})
+          JWTKeeper::Token.rotate(token.id)
           token
         end
         before(:each) do
@@ -96,7 +96,7 @@ RSpec.describe Keeper do
       end
 
       context 'with version_mismatch token' do
-        let(:token) { Keeper::Token.create(ver: 'mismatch') }
+        let(:token) { JWTKeeper::Token.create(ver: 'mismatch') }
         before(:each) do
           allow(test_controller).to receive(:authenticated)
         end
@@ -116,8 +116,8 @@ RSpec.describe Keeper do
 
     describe '#regenerate_claims' do
       let(:token) do
-        token = Keeper::Token.create({})
-        Keeper::Token.rotate(token.id)
+        token = JWTKeeper::Token.create({})
+        JWTKeeper::Token.rotate(token.id)
         token
       end
       before(:each) do
@@ -150,7 +150,7 @@ RSpec.describe Keeper do
       end
       context 'no token in request' do
         before do
-          token = Keeper::Token.create(exp: 3.hours.ago)
+          token = JWTKeeper::Token.create(exp: 3.hours.ago)
           subject.request =
             instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
         end

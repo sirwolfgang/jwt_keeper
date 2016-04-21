@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'keeper/version'
+require 'jwt_keeper/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'keeper'
-  spec.version       = Keeper::VERSION
+  spec.name          = 'jwt_keeper'
+  spec.version       = JWTKeeper::VERSION
   spec.authors       = ['David Rivera', 'Zane Wolfgang Pickett']
-  spec.email         = ['david.r.rivera193@gmail.com', 'Zane.Wolfgang.Pickett@Gmail.com']
+  spec.email         = ['david.r.rivera193@gmail.com', 'sirwolfgang@users.noreply.github.com']
   spec.summary       = 'JWT for Rails made easy'
   spec.description   = 'It is a keeper'
-  spec.homepage      = 'https://github.com/hive-xyz/keeper'
+  spec.homepage      = 'https://github.com/sirwolfgang/jwt_keeper'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -29,7 +29,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'codeclimate-test-reporter'
 
-  spec.add_dependency 'redis'
-  spec.add_dependency 'rails', '>= 4.2'
-  spec.add_dependency 'jwt', '>= 1.5'
+  spec.add_dependency 'redis', '~> 3.3'
+  spec.add_dependency 'rails', '~> 4.2'
+  spec.add_dependency 'activesupport', '~> 4.2'
+  spec.add_dependency 'jwt', '~> 1.5'
 end

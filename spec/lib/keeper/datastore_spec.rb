@@ -1,4 +1,4 @@
-RSpec.describe Keeper::Datastore do
+RSpec.describe JWTKeeper::Datastore do
   include_context 'initialize config'
   let(:jti) { SecureRandom.uuid }
 
