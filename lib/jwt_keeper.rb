@@ -1,5 +1,8 @@
 require 'jwt'
 require 'redis'
+require 'active_support'
+require 'active_support/core_ext/numeric'
+
 require 'jwt_keeper/version'
 require 'jwt_keeper/exceptions'
 require 'jwt_keeper/configuration'
