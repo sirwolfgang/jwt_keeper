@@ -4,9 +4,10 @@ RSpec.describe Keeper do
   describe 'Controller' do
     include_context 'initialize config'
 
+    let(:token) { Keeper::Token.create(claim: "Jet fuel can't melt steel beams") }
     subject(:test_controller) do
       instance = Class.new do
-        attr_accessor :request
+        attr_accessor :request, :response
         include RSpec::Mocks::ExampleMethods
         include Keeper::Controller
 
@@ -26,9 +27,10 @@ RSpec.describe Keeper do
         end
       end.new
 
-      token = Keeper::Token.create(claim: "Jet fuel can't melt steel beams")
       instance.request =
         instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
+      instance.response =
+        instance_double('Response', headers: {})
       instance
     end
 
@@ -62,9 +64,6 @@ RSpec.describe Keeper do
       context 'with expired token' do
         let(:token) { Keeper::Token.create(exp: 3.hours.ago) }
         before do
-          subject.request =
-            instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-
           allow(test_controller).to receive(:not_authenticated)
         end
 
@@ -81,9 +80,6 @@ RSpec.describe Keeper do
           token
         end
         before(:each) do
-          subject.request =
-            instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-
           allow(test_controller).to receive(:authenticated)
         end
 
@@ -102,9 +98,6 @@ RSpec.describe Keeper do
       context 'with version_mismatch token' do
         let(:token) { Keeper::Token.create(ver: 'mismatch') }
         before(:each) do
-          subject.request =
-            instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-
           allow(test_controller).to receive(:authenticated)
         end
 
@@ -128,9 +121,6 @@ RSpec.describe Keeper do
         token
       end
       before(:each) do
-        subject.request =
-          instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-
         allow(test_controller).to receive(:authenticated)
       end
 
@@ -138,6 +128,17 @@ RSpec.describe Keeper do
         expect(subject.authentication_token.claims[:regenerate_claims]).to be nil
         expect { subject.require_authentication }.to change(subject, :authentication_token)
         expect(subject.authentication_token.claims[:regenerate_claims]).to be true
+      end
+    end
+
+    describe '#respond_with_authentication' do
+      before do
+        subject.authentication_token = token
+      end
+
+      it 'sets the reponses token with the authentication_token' do
+        subject.respond_with_authentication
+        expect(subject.response.headers['Authorization']).to eq "Bearer #{token}"
       end
     end
 
