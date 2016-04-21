@@ -41,6 +41,7 @@ module Keeper
       Datastore.rotate(token_jti, Keeper.configuration.expiry.from_now.to_i)
     end
 
+    # Revokes a web token
     # @param token_jti [String] the token unique id
     def self.revoke(token_jti)
       Datastore.revoke(token_jti, Keeper.configuration.expiry.from_now.to_i)

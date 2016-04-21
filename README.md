@@ -45,7 +45,7 @@ class ApplicationController < ActionController::Base
     # Overload to make use of token data
   end
 
-  def regenerate_claims
+  def regenerate_claims(old_token)
     # Overload to update claims on automatic rotation.
     current_user = User.find(authentication_token.claims[:uid])
     { uid: current_user.id, usn: current_user.email }
