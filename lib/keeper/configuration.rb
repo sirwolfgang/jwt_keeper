@@ -6,7 +6,8 @@ module Keeper
       expiry:           24.hours,
       issuer:           'api.example.com',
       audience:         'example.com',
-      redis_connection: nil
+      redis_connection: nil,
+      version:          nil
     }.freeze
 
     # Creates a new Configuration from the passed in parameters

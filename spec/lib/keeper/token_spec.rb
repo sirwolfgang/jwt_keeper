@@ -84,7 +84,13 @@ module Keeper
         it { is_expected.not_to be_pending }
       end
 
-      context 'with a pending token' do
+      context 'with a config pending token' do
+        before { token.claims[:ver] = 'version' }
+
+        it { is_expected.to_not be_pending }
+      end
+
+      context 'with a redis pending token' do
         before { described_class.rotate(token.claims[:jti]) }
 
         it { is_expected.to be_pending }
@@ -92,6 +98,32 @@ module Keeper
 
       context 'with a valid token' do
         it { is_expected.not_to be_pending }
+      end
+    end
+
+    describe '#version_mismatch?' do
+      subject(:token) { described_class.create(private_claims) }
+
+      context 'with a revoked token' do
+        before { token.revoke }
+
+        it { is_expected.not_to be_version_mismatch }
+      end
+
+      context 'with a config pending token' do
+        before { token.claims[:ver] = 'version' }
+
+        it { is_expected.to be_version_mismatch }
+      end
+
+      context 'with a redis pending token' do
+        before { described_class.rotate(token.claims[:jti]) }
+
+        it { is_expected.to_not be_version_mismatch }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_version_mismatch }
       end
     end
 

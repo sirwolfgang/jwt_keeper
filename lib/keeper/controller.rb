@@ -13,15 +13,16 @@ module Keeper
         token = authentication_token
         return not_authenticated if token.nil?
 
-        if token.pending?
-          token.rotate(regenerate_claims)
+        if token.version_mismatch? || token.pending?
+          new_claims = regenerate_claims(token)
+          token.rotate(new_claims)
           self.authentication_token = token
         end
 
         authenticated(token)
       end
 
-      def regenerate_claims
+      def regenerate_claims(_old_token)
         nil
       end
 

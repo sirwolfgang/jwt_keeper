@@ -11,7 +11,8 @@ module Keeper
         exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
         nbf: DateTime.now.to_i,                         # not before
         iat: DateTime.now.to_i,                         # issued at
-        jti: SecureRandom.uuid                          # JWT ID
+        jti: SecureRandom.uuid,                         # JWT ID
+        ver: Keeper.configuration.version               # Version
       }.merge(private_claims)
     end
 
@@ -38,14 +39,13 @@ module Keeper
     # is inherently ignored by the token's exp check and then rewritten with the revokation on
     # rotate.
     # @param token_jti [String] the token unique id
-    def self.rotate(token_id)
-      Datastore.rotate(token_id, Keeper.configuration.expiry.from_now.to_i)
+    def self.rotate(token_jti)
+      Datastore.rotate(token_jti, Keeper.configuration.expiry.from_now.to_i)
     end
 
-    # Revokes a web token
-    def revoke
-      return if invalid?
-      Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
+    # @param token_jti [String] the token unique id
+    def self.revoke(token_jti)
+      Datastore.revoke(token_jti, Keeper.configuration.expiry.from_now.to_i)
     end
 
     # Revokes and creates a new web token
@@ -60,16 +60,28 @@ module Keeper
       self
     end
 
-    # Checks if a web token has been revoked
-    # @return [Boolean]
-    def revoked?
-      Datastore.revoked?(claims[:jti])
+    # Revokes a web token
+    def revoke
+      return if invalid?
+      Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
     end
 
     # Checks if a web token is pending a rotation
     # @return [Boolean]
     def pending?
       Datastore.pending?(claims[:jti])
+    end
+
+    # Checks if a web token is pending a global rotation
+    # @return [Boolean]
+    def version_mismatch?
+      claims[:ver] != Keeper.configuration.version
+    end
+
+    # Checks if a web token has been revoked
+    # @return [Boolean]
+    def revoked?
+      Datastore.revoked?(claims[:jti])
     end
 
     # Checks if the token valid?

@@ -18,7 +18,7 @@ RSpec.describe Keeper do
           '/'
         end
 
-        def regenerate_claims
+        def regenerate_claims(_old_token)
           { regenerate_claims: true }
         end
 
@@ -50,6 +50,12 @@ RSpec.describe Keeper do
         it 'calls authenticated' do
           subject.require_authentication
           expect(subject).to have_received(:authenticated).once
+        end
+
+        it 'does not rotates the token' do
+          expect { subject.require_authentication }.to_not change {
+            subject.authentication_token.claims[:jti]
+          }
         end
       end
 
@@ -87,7 +93,30 @@ RSpec.describe Keeper do
         end
 
         it 'rotates the token' do
-          expect { subject.require_authentication }.to change(subject, :authentication_token)
+          expect { subject.require_authentication }.to change {
+            subject.authentication_token.claims[:jti]
+          }
+        end
+      end
+
+      context 'with version_mismatch token' do
+        let(:token) { Keeper::Token.create(ver: 'mismatch') }
+        before(:each) do
+          subject.request =
+            instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
+
+          allow(test_controller).to receive(:authenticated)
+        end
+
+        it 'calls authenticated' do
+          subject.require_authentication
+          expect(subject).to have_received(:authenticated).once
+        end
+
+        it 'rotates the token' do
+          expect { subject.require_authentication }.to change {
+            subject.authentication_token.claims[:jti]
+          }
         end
       end
     end

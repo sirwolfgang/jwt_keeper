@@ -28,10 +28,7 @@ raw_token_string = token.to_jwt
 ```
 
 ## Rails Usage
-The designed rails token flow is to receive and respond to requests with the token being present in
-the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the
-fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of
-the `require_authentication` action, meaning that you will always get the latest token data as
+The designed rails token flow is to receive and respond to requests with the token being present in the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of the `require_authentication` action, meaning that you will always get the latest token data as
 created by `generate_claims` in your controllers. This new token is added to the response with
 the `respond_with_authentication` action.
 
@@ -78,26 +75,9 @@ class SessionsController < ApplicationController
   end
 ```
 
-## Motivation
-[JSON Web Tokens](https://jwt.io/) by nature cannot be invalidated, there are few methods
-for rotating out compromised ones such as:
-- shortening the time to expire
-- storing a whitelist of issued tokens in your DDL
-- tracking which tokens you've issued to who
+## Invalidation
+### Hard Invalidation
+Hard Invalidation is a permanent revocation of the token. The primary cases of this is when a user wishes to logout, or when your security has been otherwise compromised. To revoke all tokens simply update the configuration `secret`. To revoke a single token you can utilize either the class(`Token.revoke(jti)`) or instance(`token.revoke`) method.
 
-These solutions to me all seemed inadequate; Shortening the time to expiry means
-you are rotating out good non-compromised keys more frequently possibly running into situations causing your users to have to re-login, which is bad for obvious user experience reasons.
-
-Storing a whitelist in your DDL also doesn't make sense because the point of JWT
-is the minimize the hits to the DDL by letting you store your own claims, like
-user permissions, and by being able to validate it without the need for any DB call.
-
-Lastly tracking issued JWT's also makes no sense. The point of them is to be able
-to issue them to anything an android phone, a web browser, a toaster it doesn't matter. It's suppose to account for scaling so you're suppose to be able to issue as many as need be.Then authenticate them on any web head. Tracking issued ones just causes more DB lookups to happen and the need for more database synchronization (running into the [CAP](https://en.wikipedia.org/wiki/CAP_theorem)).
-
-So I made [Hotel]/Keeper.
-
-## Method
-The way we invalidate tokens is by storing a blacklist of compromised tokens in redis. Tokens only need to be stored until their expiry, after that they are, well, expired and no longer need to be tracked. Redis provides a nice feature called [expire](http://redis.io/commands/expire). So all we have to do is set the redis expiry for the record equal to the difference of the tokens expiry and the current time.
-
-This approach provides for nice self cleaning records and doesn't require any change to your DDL.
+### Soft Invalidation
+Soft Invalidation is the process of triggering a rotation upon the next time a token is seen in a request. On the global scale this is done when there is a version mismatch in the config. Utilizing the rails controller flow, this method works even if you have two different versions of your app deployed and requests bounce back and forth; Making rolling deployments and rollbacks completely seamless. To rotate a single token, like in the case of a change of user permissions, simply use the class(`Token.rotate`) method to flag the token for regeneration.
