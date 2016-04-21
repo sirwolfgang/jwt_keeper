@@ -16,5 +16,15 @@ module Keeper
     def initialize(params = {})
       super(DEFAULTS.merge(params))
     end
+
+    # @!visibility private
+    def base_claims
+      {
+        iss: Keeper.configuration.issuer,               # issuer
+        aud: Keeper.configuration.audience,             # audience
+        exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
+        ver: Keeper.configuration.version               # Version
+      }
+    end
   end
 end

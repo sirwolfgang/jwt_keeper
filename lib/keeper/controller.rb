@@ -7,8 +7,8 @@ module Keeper
     end
 
     module InstanceMethods
-      JWT_REGEX = /[A-Za-z0-9\-_=]+\.[A-Za-z0-9\-_=]+\.?[A-Za-z0-9\-_=]+/
-
+      # Available to be used as a before_action by the application's controllers. This is
+      # the main logical section for decoding, and automatically rotating tokens
       def require_authentication
         token = authentication_token
         return not_authenticated if token.nil?
@@ -22,24 +22,29 @@ module Keeper
         authenticated(token)
       end
 
-      def regenerate_claims(_old_token)
-        nil
+      # Invoked by the require_authentication method as part of the automatic rotation
+      # process. The application should override this method to include the necessary
+      # claims.
+      def regenerate_claims(old_token)
       end
 
+      # Moves the authentication_token from the request to the response
       def respond_with_authentication
         response.headers['Authorization'] = request.headers['Authorization']
       end
 
+      # Decodes and returns the token
       def authentication_token
         return nil unless request.headers['Authorization']
-        Keeper::Token.find(request.headers['Authorization'][JWT_REGEX])
+        Keeper::Token.find(request.headers['Authorization'].split.last)
       end
 
+      # Assigns a token to the request to act as a single source of truth
       def authentication_token=(token)
         request.headers['Authorization'] = "Bearer #{token.to_jwt}"
       end
 
-      # used when a user tries to access a page while logged out, is asked to login,
+      # Used when a user tries to access a page while logged out, is asked to login,
       # and we want to return him back to the page he originally wanted.
       def redirect_back_or_to(url, flash_hash = {})
         redirect_to(session[:return_to_url] || url, flash: flash_hash)
@@ -52,6 +57,8 @@ module Keeper
         redirect_to root_path
       end
 
+      # The default action for accepting authenticated connections.
+      # You can override this method in your controllers
       def authenticated(token)
       end
     end

@@ -6,14 +6,12 @@ module Keeper
     # @param private_claims [Hash] the custom claims to encode
     def initialize(private_claims = {})
       @claims = {
-        iss: Keeper.configuration.issuer,               # issuer
-        aud: Keeper.configuration.audience,             # audience
-        exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
-        nbf: DateTime.now.to_i,                         # not before
-        iat: DateTime.now.to_i,                         # issued at
-        jti: SecureRandom.uuid,                         # JWT ID
-        ver: Keeper.configuration.version               # Version
-      }.merge(private_claims)
+        nbf: DateTime.now.to_i, # not before
+        iat: DateTime.now.to_i, # issued at
+        jti: SecureRandom.uuid  # JWT ID
+      }
+      @claims.merge!(Keeper.configuration.base_claims)
+      @claims.merge!(private_claims)
     end
 
     # Creates a new web token
