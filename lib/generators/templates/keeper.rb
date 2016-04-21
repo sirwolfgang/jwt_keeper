@@ -26,4 +26,7 @@ Keeper.configure do |config|
 
   # the location of redis config file
   # config.redis_connection = Redis.new(connection_options)
+
+  # A unique idenfitier for the token version.
+  # config.version = 1
 end

@@ -6,13 +6,12 @@ module Keeper
     # @param private_claims [Hash] the custom claims to encode
     def initialize(private_claims = {})
       @claims = {
-        iss: Keeper.configuration.issuer,               # issuer
-        aud: Keeper.configuration.audience,             # audience
-        exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
-        nbf: DateTime.now.to_i,                         # not before
-        iat: DateTime.now.to_i,                         # issued at
-        jti: SecureRandom.uuid                          # JWT ID
-      }.merge(private_claims)
+        nbf: DateTime.now.to_i, # not before
+        iat: DateTime.now.to_i, # issued at
+        jti: SecureRandom.uuid  # JWT ID
+      }
+      @claims.merge!(Keeper.configuration.base_claims)
+      @claims.merge!(private_claims)
     end
 
     # Creates a new web token
@@ -34,26 +33,53 @@ module Keeper
       new_token
     end
 
+    # Sets a token to the pending rotation state. The expire is set to the maxium possible time but
+    # is inherently ignored by the token's exp check and then rewritten with the revokation on
+    # rotate.
+    # @param token_jti [String] the token unique id
+    def self.rotate(token_jti)
+      Datastore.rotate(token_jti, Keeper.configuration.expiry.from_now.to_i)
+    end
+
+    # @param token_jti [String] the token unique id
+    def self.revoke(token_jti)
+      Datastore.revoke(token_jti, Keeper.configuration.expiry.from_now.to_i)
+    end
+
+    # Revokes and creates a new web token
+    # @param new_claims [Hash] Used to override and update claims during rotation
+    # @return [String] new token
+    def rotate(new_claims = nil)
+      revoke
+
+      new_claims ||= claims.except(:iss, :aud, :exp, :nbf, :iat, :jti)
+      new_token = self.class.new(new_claims)
+      @claims = new_token.claims
+      self
+    end
+
     # Revokes a web token
     def revoke
       return if invalid?
-      Datastore.expire(claims[:jti], claims[:exp] - DateTime.now.to_i)
+      Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
+    end
+
+    # Checks if a web token is pending a rotation
+    # @return [Boolean]
+    def pending?
+      Datastore.pending?(claims[:jti])
+    end
+
+    # Checks if a web token is pending a global rotation
+    # @return [Boolean]
+    def version_mismatch?
+      claims[:ver] != Keeper.configuration.version
     end
 
     # Checks if a web token has been revoked
     # @return [Boolean]
     def revoked?
-      Datastore.expired?(claims[:jti])
-    end
-
-    # Revokes and creates a new web token
-    # @return [String] new token
-    def rotate
-      revoke
-
-      new_token = self.class.new(claims.except(:iss, :aud, :exp, :nbf, :iat, :jti))
-      @claims = new_token.claims
-      new_token
+      Datastore.revoked?(claims[:jti])
     end
 
     # Checks if the token valid?
@@ -73,14 +99,7 @@ module Keeper
     def to_jwt
       encode
     end
-    alias_method :to_s, :to_jwt
-
-    private
-
-    # @!visibility private
-    def encode
-      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
-    end
+    alias to_s to_jwt
 
     # @!visibility private
     def self.decode(raw_token)
@@ -99,6 +118,13 @@ module Keeper
 
     rescue JWT::DecodeError
       return nil
+    end
+
+    private
+
+    # @!visibility private
+    def encode
+      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
     end
   end
 end
