@@ -1,4 +1,4 @@
-module Keeper
+module JWTKeeper
   class Token
     attr_accessor :claims
 
@@ -10,7 +10,7 @@ module Keeper
         iat: DateTime.now.to_i, # issued at
         jti: SecureRandom.uuid  # JWT ID
       }
-      @claims.merge!(Keeper.configuration.base_claims)
+      @claims.merge!(JWTKeeper.configuration.base_claims)
       @claims.merge!(private_claims)
     end
 
@@ -38,13 +38,13 @@ module Keeper
     # rotate.
     # @param token_jti [String] the token unique id
     def self.rotate(token_jti)
-      Datastore.rotate(token_jti, Keeper.configuration.expiry.from_now.to_i)
+      Datastore.rotate(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
     end
 
     # Revokes a web token
     # @param token_jti [String] the token unique id
     def self.revoke(token_jti)
-      Datastore.revoke(token_jti, Keeper.configuration.expiry.from_now.to_i)
+      Datastore.revoke(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
     end
 
     # Easy interface for using the token's id
@@ -80,7 +80,7 @@ module Keeper
     # Checks if a web token is pending a global rotation
     # @return [Boolean]
     def version_mismatch?
-      claims[:ver] != Keeper.configuration.version
+      claims[:ver] != JWTKeeper.configuration.version
     end
 
     # Checks if a web token has been revoked
@@ -110,8 +110,8 @@ module Keeper
 
     # @!visibility private
     def self.decode(raw_token)
-      JWT.decode(raw_token, Keeper.configuration.secret, true,
-                 algorithm: Keeper.configuration.algorithm,
+      JWT.decode(raw_token, JWTKeeper.configuration.secret, true,
+                 algorithm: JWTKeeper.configuration.algorithm,
                  verify_iss: true,
                  verify_aud: true,
                  verify_iat: true,
@@ -119,8 +119,8 @@ module Keeper
                  verify_jti: false,
                  leeway: 0,
 
-                 iss: Keeper.configuration.issuer,
-                 aud: Keeper.configuration.audience
+                 iss: JWTKeeper.configuration.issuer,
+                 aud: JWTKeeper.configuration.audience
                 ).first.symbolize_keys
 
     rescue JWT::DecodeError
@@ -131,7 +131,7 @@ module Keeper
 
     # @!visibility private
     def encode
-      JWT.encode(claims, Keeper.configuration.secret, Keeper.configuration.algorithm)
+      JWT.encode(claims, JWTKeeper.configuration.secret, JWTKeeper.configuration.algorithm)
     end
   end
 end

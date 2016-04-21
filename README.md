@@ -1,14 +1,14 @@
-# Keeper
-[![Build Status](https://img.shields.io/travis/hive-xyz/keeper/master.svg)](https://travis-ci.org/hive-xyz/keeper)
-[![Dependency Status](https://img.shields.io/gemnasium/hive-xyz/keeper.svg)](https://gemnasium.com/hive-xyz/keeper)
-[![Code Climate](https://img.shields.io/codeclimate/github/hive-xyz/keeper.svg)](https://codeclimate.com/github/hive-xyz/keeper)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/hive-xyz/keeper.svg)](https://codeclimate.com/github/hive-xyz/keeper/coverage)
-[![Inline docs](http://inch-ci.org/github/hive-xyz/keeper.svg?style=shields)](http://inch-ci.org/github/hive-xyz/keeper)
+# JWT Keeper
+[![Build Status](https://img.shields.io/travis/sirwolfgang/jwt_keeper/master.svg)](https://travis-ci.org/sirwolfgang/jwt_keeper)
+[![Dependency Status](https://img.shields.io/gemnasium/sirwolfgang/jwt_keeper.svg)](https://gemnasium.com/sirwolfgang/jwt_keeper)
+[![Code Climate](https://img.shields.io/codeclimate/github/sirwolfgang/jwt_keeper.svg)](https://codeclimate.com/github/sirwolfgang/jwt_keeper)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/sirwolfgang/jwt_keeper.svg)](https://codeclimate.com/github/sirwolfgang/jwt_keeper/coverage)
+[![Inline docs](http://inch-ci.org/github/sirwolfgang/jwt_keeper.svg?style=shields)](http://inch-ci.org/github/sirwolfgang/jwt_keeper)
 
 An managing interface layer for handling the creation and validation of JWTs.
 
 ## Setup
- - Add `gem 'keeper', git: 'https://github.com/hive-xyz/keeper.git'` to Gemfile
+ - Add `gem 'jwt_keeper', '~> 2.0'` to Gemfile
  - Run `rails generate keeper:install`
  - Configure `config/initializers/keeper.rb`
  - Done
@@ -17,8 +17,8 @@ An managing interface layer for handling the creation and validation of JWTs.
 Here are the basic methods you can call to perform various operations
 
 ```ruby
-token = Keeper::Token.create(private_claim_hash)
-token = Keeper::Token.find(raw_token_string)
+token = JWTKeeper::Token.create(private_claim_hash)
+token = JWTKeeper::Token.find(raw_token_string)
 
 token.revoke
 token.rotate
@@ -60,7 +60,7 @@ class SessionsController < ApplicationController
 
   # POST /sessions
   def create
-    authentication_token = Keeper::Token.create({ uid: @user.id, usn: @user.email })
+    authentication_token = JWTKeeper::Token.create({ uid: @user.id, usn: @user.email })
   end
 
   # PATCH/PUT /sessions

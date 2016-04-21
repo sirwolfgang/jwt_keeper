@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Keeper do
+RSpec.describe JWTKeeper do
   describe '#configure' do
     let(:test_config) do
       {
@@ -15,7 +15,7 @@ RSpec.describe Keeper do
 
     context 'without block' do
       before do
-        described_class.configure(Keeper::Configuration.new(test_config))
+        described_class.configure(JWTKeeper::Configuration.new(test_config))
       end
 
       it 'sets the configuration based on param' do

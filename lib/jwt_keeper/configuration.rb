@@ -1,4 +1,4 @@
-module Keeper
+module JWTKeeper
   class Configuration < OpenStruct
     DEFAULTS = {
       algorithm:       'HS512',
@@ -20,10 +20,10 @@ module Keeper
     # @!visibility private
     def base_claims
       {
-        iss: Keeper.configuration.issuer,               # issuer
-        aud: Keeper.configuration.audience,             # audience
-        exp: Keeper.configuration.expiry.from_now.to_i, # expiration time
-        ver: Keeper.configuration.version               # Version
+        iss: JWTKeeper.configuration.issuer,               # issuer
+        aud: JWTKeeper.configuration.audience,             # audience
+        exp: JWTKeeper.configuration.expiry.from_now.to_i, # expiration time
+        ver: JWTKeeper.configuration.version               # Version
       }
     end
   end

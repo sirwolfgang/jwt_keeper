@@ -1,4 +1,4 @@
-module Keeper
+module JWTKeeper
   # The token is invalid
   class InvalidTokenError < StandardError; end
 

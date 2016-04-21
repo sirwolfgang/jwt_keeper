@@ -12,7 +12,7 @@ SimpleCov.formatter =
 SimpleCov.start
 
 require 'rails'
-require 'keeper'
+require 'jwt_keeper'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -53,6 +53,6 @@ RSpec.shared_context 'initialize config' do
   end
 
   before(:each) do
-    Keeper.configure(Keeper::Configuration.new(test_config))
+    JWTKeeper.configure(JWTKeeper::Configuration.new(test_config))
   end
 end

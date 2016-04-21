@@ -1,4 +1,4 @@
-module Keeper
+module JWTKeeper
   module Datastore
     class << self
       # @!visibility private
@@ -27,12 +27,12 @@ module Keeper
 
       # @!visibility private
       def set_with_expiry(jti, seconds, type)
-        Keeper.configuration.redis_connection.setex(jti, seconds, type)
+        JWTKeeper.configuration.redis_connection.setex(jti, seconds, type)
       end
 
       # @!visibility private
       def get(jti)
-        Keeper.configuration.redis_connection.get(jti)
+        JWTKeeper.configuration.redis_connection.get(jti)
       end
     end
   end

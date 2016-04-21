@@ -1,4 +1,4 @@
-module Keeper
+module JWTKeeper
   module Controller
     def self.included(klass)
       klass.class_eval do
@@ -36,7 +36,7 @@ module Keeper
       # Decodes and returns the token
       def authentication_token
         return nil unless request.headers['Authorization']
-        Keeper::Token.find(request.headers['Authorization'].split.last)
+        JWTKeeper::Token.find(request.headers['Authorization'].split.last)
       end
 
       # Assigns a token to the request to act as a single source of truth

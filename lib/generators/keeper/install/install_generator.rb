@@ -1,6 +1,6 @@
 require 'rails/generators/base'
 
-module Keeper
+module JWTKeeper
   class InstallGenerator < Rails::Generators::Base
     source_root File.expand_path('../../../templates', __FILE__)
 
@@ -9,7 +9,7 @@ module Keeper
     # @example Install
     #   rails generate keeper:install
     def copy_files
-      copy_file 'keeper.rb', 'config/initializers/keeper.rb'
+      copy_file 'jwt_keeper.rb', 'config/initializers/keeper.rb'
     end
   end
 end
