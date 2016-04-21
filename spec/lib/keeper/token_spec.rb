@@ -41,6 +41,20 @@ module Keeper
       end
     end
 
+    describe '.revoke' do
+      subject(:token) { described_class.create(private_claims) }
+
+      it 'invalidates the token' do
+        expect(token.valid?).to eq true
+        expect(token.revoked?).to eq false
+
+        expect(described_class.revoke(token.claims[:jti]))
+
+        expect(token.valid?).to eq false
+        expect(token.revoked?).to eq true
+      end
+    end
+
     describe '#revoke' do
       subject(:token) { described_class.create(private_claims) }
 
