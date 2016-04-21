@@ -56,7 +56,7 @@ RSpec.describe Keeper do
 
         it 'does not rotates the token' do
           expect { subject.require_authentication }.to_not change {
-            subject.authentication_token.claims[:jti]
+            subject.authentication_token.id
           }
         end
       end
@@ -76,7 +76,7 @@ RSpec.describe Keeper do
       context 'with pending token' do
         let(:token) do
           token = Keeper::Token.create({})
-          Keeper::Token.rotate(token.claims[:jti])
+          Keeper::Token.rotate(token.id)
           token
         end
         before(:each) do
@@ -90,7 +90,7 @@ RSpec.describe Keeper do
 
         it 'rotates the token' do
           expect { subject.require_authentication }.to change {
-            subject.authentication_token.claims[:jti]
+            subject.authentication_token.id
           }
         end
       end
@@ -108,7 +108,7 @@ RSpec.describe Keeper do
 
         it 'rotates the token' do
           expect { subject.require_authentication }.to change {
-            subject.authentication_token.claims[:jti]
+            subject.authentication_token.id
           }
         end
       end
@@ -117,7 +117,7 @@ RSpec.describe Keeper do
     describe '#regenerate_claims' do
       let(:token) do
         token = Keeper::Token.create({})
-        Keeper::Token.rotate(token.claims[:jti])
+        Keeper::Token.rotate(token.id)
         token
       end
       before(:each) do
