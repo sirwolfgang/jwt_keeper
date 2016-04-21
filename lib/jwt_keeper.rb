@@ -1,13 +1,16 @@
 require 'jwt'
 require 'redis'
-require 'keeper/version'
-require 'keeper/exceptions'
-require 'keeper/configuration'
-require 'keeper/datastore'
-require 'keeper/token'
-require 'keeper/controller'
+require 'active_support'
+require 'active_support/core_ext/numeric'
 
-module Keeper
+require 'jwt_keeper/version'
+require 'jwt_keeper/exceptions'
+require 'jwt_keeper/configuration'
+require 'jwt_keeper/datastore'
+require 'jwt_keeper/token'
+require 'jwt_keeper/controller'
+
+module JWTKeeper
   class << self
     attr_reader :configuration, :datastore
   end
@@ -21,5 +24,5 @@ module Keeper
     @configuration = new_configuration.freeze
   end
 
-  require 'keeper/engine' if defined?(Rails)
+  require 'jwt_keeper/engine' if defined?(Rails)
 end

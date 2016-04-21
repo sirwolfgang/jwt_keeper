@@ -1,32 +1,19 @@
 require 'spec_helper'
 
-module Keeper
+module JWTKeeper
   RSpec.describe Token do
-    let(:test_config) do
-      {
-        algorithm:        'HS256',
-        secret:           'secret',
-        expiry:           24.hours,
-        issuer:           'api.example.com',
-        audience:         'example.com',
-        redis_connection: Redis.new(url: ENV['REDIS_URL'])
-      }
-    end
+    include_context 'initialize config'
     let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
     let(:raw_token)      { described_class.create(private_claims).to_jwt }
 
-    before(:each) do
-      Keeper.configure(Keeper::Configuration.new(test_config))
-    end
-
-    describe '#create' do
+    describe '.create' do
       subject { described_class.create(private_claims) }
 
       it { is_expected.to be_instance_of described_class }
       it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
     end
 
-    describe '#find' do
+    describe '.find' do
       subject { described_class.find(raw_token) }
 
       it { is_expected.to be_instance_of described_class }
@@ -45,7 +32,30 @@ module Keeper
       end
     end
 
+    describe '.rotate' do
+      subject(:token) { described_class.create(private_claims) }
+      before(:each) { described_class.rotate(token.id) }
+
+      it 'marks the token for rotation' do
+        expect(token.pending?).to eq true
+      end
+    end
+
     describe '.revoke' do
+      subject(:token) { described_class.create(private_claims) }
+
+      it 'invalidates the token' do
+        expect(token.valid?).to eq true
+        expect(token.revoked?).to eq false
+
+        expect(described_class.revoke(token.claims[:jti]))
+
+        expect(token.valid?).to eq false
+        expect(token.revoked?).to eq true
+      end
+    end
+
+    describe '#revoke' do
       subject(:token) { described_class.create(private_claims) }
 
       it 'invalidates the token' do
@@ -62,14 +72,72 @@ module Keeper
     describe '#revoked?' do
       subject(:token) { described_class.create(private_claims) }
 
-      context 'when token has been revoked' do
+      context 'with a revoked token' do
         before { token.revoke }
 
         it { is_expected.to be_revoked }
       end
 
-      context 'when token is valid' do
+      context 'with a pending token' do
+        before { described_class.rotate(token.id) }
+
         it { is_expected.not_to be_revoked }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_revoked }
+      end
+    end
+
+    describe '#pending?' do
+      subject(:token) { described_class.create(private_claims) }
+
+      context 'with a revoked token' do
+        before { token.revoke }
+
+        it { is_expected.not_to be_pending }
+      end
+
+      context 'with a config pending token' do
+        before { token.claims[:ver] = 'version' }
+
+        it { is_expected.to_not be_pending }
+      end
+
+      context 'with a redis pending token' do
+        before { described_class.rotate(token.id) }
+
+        it { is_expected.to be_pending }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_pending }
+      end
+    end
+
+    describe '#version_mismatch?' do
+      subject(:token) { described_class.create(private_claims) }
+
+      context 'with a revoked token' do
+        before { token.revoke }
+
+        it { is_expected.not_to be_version_mismatch }
+      end
+
+      context 'with a config pending token' do
+        before { token.claims[:ver] = 'version' }
+
+        it { is_expected.to be_version_mismatch }
+      end
+
+      context 'with a redis pending token' do
+        before { described_class.rotate(token.id) }
+
+        it { is_expected.to_not be_version_mismatch }
+      end
+
+      context 'with a valid token' do
+        it { is_expected.not_to be_version_mismatch }
       end
     end
 
@@ -83,11 +151,11 @@ module Keeper
       it { expect(old_token.claims[:claim]).to eq new_token.claims[:claim] }
     end
 
-    describe '.valid?' do
+    describe '#valid?' do
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do
-        before { Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
+        before { JWTKeeper.configure(JWTKeeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
         it { is_expected.not_to be_valid }
       end
 
@@ -96,11 +164,11 @@ module Keeper
       end
     end
 
-    describe '.invalid?' do
+    describe '#invalid?' do
       subject { described_class.create(private_claims) }
 
       context 'when invalid' do
-        before { Keeper.configure(Keeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
+        before { JWTKeeper.configure(JWTKeeper::Configuration.new(test_config.merge(expiry: -1.hours))) }
         it { is_expected.to be_invalid }
       end
 

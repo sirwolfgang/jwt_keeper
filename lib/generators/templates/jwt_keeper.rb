@@ -1,4 +1,4 @@
-Keeper.configure do |config|
+JWTKeeper.configure do |config|
   # The time to expire for the tokens
   # config.expiry           = 24.hours
 
@@ -26,4 +26,7 @@ Keeper.configure do |config|
 
   # the location of redis config file
   # config.redis_connection = Redis.new(connection_options)
+
+  # A unique idenfitier for the token version.
+  # config.version = 1
 end

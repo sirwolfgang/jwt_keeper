@@ -4,14 +4,15 @@ Dotenv.load
 require 'simplecov'
 require 'codeclimate-test-reporter'
 
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-  SimpleCov::Formatter::HTMLFormatter,
-  CodeClimate::TestReporter::Formatter
-])
+SimpleCov.formatter =
+  SimpleCov::Formatter::MultiFormatter.new([
+                                             SimpleCov::Formatter::HTMLFormatter,
+                                             CodeClimate::TestReporter::Formatter
+                                           ])
 SimpleCov.start
 
 require 'rails'
-require 'keeper'
+require 'jwt_keeper'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -37,4 +38,21 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = :random
   Kernel.srand config.seed
+end
+
+RSpec.shared_context 'initialize config' do
+  let(:test_config) do
+    {
+      algorithm:        'HS256',
+      secret:           'secret',
+      expiry:           24.hours,
+      issuer:           'api.example.com',
+      audience:         'example.com',
+      redis_connection: Redis.new(url: ENV['REDIS_URL'])
+    }
+  end
+
+  before(:each) do
+    JWTKeeper.configure(JWTKeeper::Configuration.new(test_config))
+  end
 end
