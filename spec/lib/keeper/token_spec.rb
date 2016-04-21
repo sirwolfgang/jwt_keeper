@@ -34,7 +34,7 @@ module Keeper
 
     describe '.rotate' do
       subject(:token) { described_class.create(private_claims) }
-      before(:each) { described_class.rotate(token.claims[:jti]) }
+      before(:each) { described_class.rotate(token.id) }
 
       it 'marks the token for rotation' do
         expect(token.pending?).to eq true
@@ -79,7 +79,7 @@ module Keeper
       end
 
       context 'with a pending token' do
-        before { described_class.rotate(token.claims[:jti]) }
+        before { described_class.rotate(token.id) }
 
         it { is_expected.not_to be_revoked }
       end
@@ -105,7 +105,7 @@ module Keeper
       end
 
       context 'with a redis pending token' do
-        before { described_class.rotate(token.claims[:jti]) }
+        before { described_class.rotate(token.id) }
 
         it { is_expected.to be_pending }
       end
@@ -131,7 +131,7 @@ module Keeper
       end
 
       context 'with a redis pending token' do
-        before { described_class.rotate(token.claims[:jti]) }
+        before { described_class.rotate(token.id) }
 
         it { is_expected.to_not be_version_mismatch }
       end

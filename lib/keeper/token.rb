@@ -46,6 +46,12 @@ module Keeper
       Datastore.revoke(token_jti, Keeper.configuration.expiry.from_now.to_i)
     end
 
+    # Easy interface for using the token's id
+    # @return [String] token's uuid
+    def id
+      claims[:jti]
+    end
+
     # Revokes and creates a new web token
     # @param new_claims [Hash] Used to override and update claims during rotation
     # @return [String] new token
@@ -61,13 +67,13 @@ module Keeper
     # Revokes a web token
     def revoke
       return if invalid?
-      Datastore.revoke(claims[:jti], claims[:exp] - DateTime.now.to_i)
+      Datastore.revoke(id, claims[:exp] - DateTime.now.to_i)
     end
 
     # Checks if a web token is pending a rotation
     # @return [Boolean]
     def pending?
-      Datastore.pending?(claims[:jti])
+      Datastore.pending?(id)
     end
 
     # Checks if a web token is pending a global rotation
@@ -79,7 +85,7 @@ module Keeper
     # Checks if a web token has been revoked
     # @return [Boolean]
     def revoked?
-      Datastore.revoked?(claims[:jti])
+      Datastore.revoked?(id)
     end
 
     # Checks if the token valid?
