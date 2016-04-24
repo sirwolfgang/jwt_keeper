@@ -2,36 +2,27 @@ require 'spec_helper'
 
 RSpec.describe JWTKeeper do
   describe '#configure' do
-    let(:test_config) do
-      {
-        algorithm:        'HS256',
-        secret:           'secret',
-        expiry:           24.hours,
-        issuer:           'api.example.com',
-        audience:         'example.com',
-        redis_connection: Redis.new(url: ENV['REDIS_URL'])
-      }
-    end
+    let(:new_config) { { secret: '#configure-secret' } }
 
     context 'without block' do
       before do
-        described_class.configure(JWTKeeper::Configuration.new(test_config))
+        described_class.configure(JWTKeeper::Configuration.new(new_config))
       end
 
       it 'sets the configuration based on param' do
-        expect(described_class.configuration.secret).to eql test_config[:secret]
+        expect(described_class.configuration.secret).to eql new_config[:secret]
       end
     end
 
     context 'with block' do
       before do
         described_class.configure do |config|
-          config.secret = test_config[:secret]
+          config.secret = new_config[:secret]
         end
       end
 
       it 'sets configuration based on the block' do
-        expect(described_class.configuration.secret).to eql test_config[:secret]
+        expect(described_class.configuration.secret).to eql new_config[:secret]
       end
     end
   end

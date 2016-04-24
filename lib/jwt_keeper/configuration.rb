@@ -7,7 +7,8 @@ module JWTKeeper
       issuer:           'api.example.com',
       audience:         'example.com',
       redis_connection: nil,
-      version:          nil
+      version:          nil,
+      cookie_lock:      false
     }.freeze
 
     # Creates a new Configuration from the passed in parameters
