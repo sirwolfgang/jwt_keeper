@@ -10,38 +10,38 @@ module JWTKeeper
       # Available to be used as a before_action by the application's controllers. This is
       # the main logical section for decoding, and automatically rotating tokens
       def require_authentication
-        token = authentication_token
+        token = read_authentication_token
         return not_authenticated if token.nil?
 
         if token.version_mismatch? || token.pending?
           new_claims = regenerate_claims(token)
           token.rotate(new_claims)
-          self.authentication_token = token
         end
 
+        write_authentication_token(token)
         authenticated(token)
       end
 
-      # Invoked by the require_authentication method as part of the automatic rotation
-      # process. The application should override this method to include the necessary
-      # claims.
-      def regenerate_claims(old_token)
-      end
-
-      # Moves the authentication_token from the request to the response
-      def respond_with_authentication
-        response.headers['Authorization'] = request.headers['Authorization']
-      end
-
       # Decodes and returns the token
-      def authentication_token
+      def read_authentication_token
         return nil unless request.headers['Authorization']
-        JWTKeeper::Token.find(request.headers['Authorization'].split.last)
+        @authentication_token ||=
+          JWTKeeper::Token.find(request.headers['Authorization'].split.last, cookies['jwt_keeper'])
       end
 
-      # Assigns a token to the request to act as a single source of truth
-      def authentication_token=(token)
-        request.headers['Authorization'] = "Bearer #{token.to_jwt}"
+      # Encodes and writes the token
+      def write_authentication_token(token)
+        return clear_authentication_token if token.nil?
+        response.headers['Authorization'] = "Bearer #{token.to_jwt}"
+        cookies['jwt_keeper'] = token.to_cookie
+        @authentication_token = token
+      end
+
+      # delets the authentication token
+      def clear_authentication_token
+        response.headers['Authorization'] = nil
+        cookies.delete('jwt_keeper')
+        @authentication_token = nil
       end
 
       # Used when a user tries to access a page while logged out, is asked to login,
@@ -60,6 +60,12 @@ module JWTKeeper
       # The default action for accepting authenticated connections.
       # You can override this method in your controllers
       def authenticated(token)
+      end
+
+      # Invoked by the require_authentication method as part of the automatic rotation
+      # process. The application should override this method to include the necessary
+      # claims.
+      def regenerate_claims(old_token)
       end
     end
   end

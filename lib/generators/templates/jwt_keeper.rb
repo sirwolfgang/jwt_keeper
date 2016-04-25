@@ -1,6 +1,6 @@
 JWTKeeper.configure do |config|
   # The time to expire for the tokens
-  # config.expiry           = 24.hours
+  # config.expiry           = 1.hour
 
   # The hashing method to for the tokens
   # Options:
@@ -28,5 +28,8 @@ JWTKeeper.configure do |config|
   # config.redis_connection = Redis.new(connection_options)
 
   # A unique idenfitier for the token version.
-  # config.version = 1
+  # config.version          = 1
+
+  # Use a httponly/secure cookie secret to prevent session hijacking
+  # config.cookie_lock      = true
 end

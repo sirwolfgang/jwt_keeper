@@ -112,9 +112,21 @@ module JWTKeeper
     end
     alias to_s to_jwt
 
+    # Encodes the cookie
+    # @return [Hash]
+    def to_cookie
+      {
+        value: cookie_secret,
+        expires: Time.at(claims[:exp]),
+        # domain: :all,
+        # secure: true,
+        # httponly: true
+      }
+    end
+
     # @!visibility private
     def self.decode(raw_token, cookie_secret)
-      JWT.decode(raw_token, JWTKeeper.configuration.secret + cookie_secret.to_s, true,
+      JWT.decode(raw_token, JWTKeeper.configuration.secret.to_s + cookie_secret.to_s, true,
                  algorithm: JWTKeeper.configuration.algorithm,
                  verify_iss: true,
                  verify_aud: true,
@@ -135,7 +147,7 @@ module JWTKeeper
     # @!visibility private
     def encode
       JWT.encode(claims,
-                 JWTKeeper.configuration.secret + cookie_secret.to_s,
+                 JWTKeeper.configuration.secret.to_s + cookie_secret.to_s,
                  JWTKeeper.configuration.algorithm
                 )
     end
