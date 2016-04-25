@@ -8,9 +8,9 @@
 An managing interface layer for handling the creation and validation of JWTs.
 
 ## Setup
- - Add `gem 'jwt_keeper', '~> 2.0'` to Gemfile
+ - Add `gem 'jwt_keeper', '~> 3.0'` to Gemfile
  - Run `rails generate keeper:install`
- - Configure `config/initializers/keeper.rb`
+ - Configure `config/initializers/jwt_keeper.rb`
  - Done
 
 ## Basic Usage
