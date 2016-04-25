@@ -9,7 +9,7 @@ module JWTKeeper
     # @example Install
     #   rails generate keeper:install
     def copy_files
-      copy_file 'jwt_keeper.rb', 'config/initializers/keeper.rb'
+      copy_file 'jwt_keeper.rb', 'config/initializers/jwt_keeper.rb'
     end
   end
 end

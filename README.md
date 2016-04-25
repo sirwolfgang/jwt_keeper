@@ -8,9 +8,9 @@
 An managing interface layer for handling the creation and validation of JWTs.
 
 ## Setup
- - Add `gem 'jwt_keeper', '~> 2.0'` to Gemfile
+ - Add `gem 'jwt_keeper', '~> 3.0'` to Gemfile
  - Run `rails generate keeper:install`
- - Configure `config/initializers/keeper.rb`
+ - Configure `config/initializers/jwt_keeper.rb`
  - Done
 
 ## Basic Usage
@@ -29,8 +29,7 @@ raw_token_string = token.to_jwt
 
 ## Rails Usage
 The designed rails token flow is to receive and respond to requests with the token being present in the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of the `require_authentication` action, meaning that you will always get the latest token data as
-created by `generate_claims` in your controllers. This new token is added to the response with
-the `respond_with_authentication` action.
+created by `generate_claims` in your controllers. This new token is added to the response with the `respond_with_authentication` action.
 
 ```ruby
 class ApplicationController < ActionController::Base
@@ -81,3 +80,6 @@ Hard Invalidation is a permanent revocation of the token. The primary cases of t
 
 ### Soft Invalidation
 Soft Invalidation is the process of triggering a rotation upon the next time a token is seen in a request. On the global scale this is done when there is a version mismatch in the config. Utilizing the rails controller flow, this method works even if you have two different versions of your app deployed and requests bounce back and forth; Making rolling deployments and rollbacks completely seamless. To rotate a single token, like in the case of a change of user permissions, simply use the class(`Token.rotate`) method to flag the token for regeneration.
+
+## Cookie Locking
+Cookie locking is the practice of securing the JWT by pairing it with a secure/httponly cookie. When a JWT is created, part of the secret used to sign it is a one time generated key that is stored in a matching cookie. The cookie and JWT thus must be sent together to be considered valid. The effective result makes it extremely hard to hijack a session by stealing the JWT. This reduces the surface area of XSS considerably.
