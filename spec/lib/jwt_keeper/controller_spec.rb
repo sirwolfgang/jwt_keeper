@@ -6,6 +6,18 @@ RSpec.describe JWTKeeper do
 
     let(:token) { JWTKeeper::Token.create(claim: "Jet fuel can't melt steel beams") }
     subject(:test_controller) do
+      cookies_klass = Class.new(Hash) do
+        def signed
+          self
+        end
+      end
+
+      message_klass = Class.new(Hash) do
+        def headers
+          self
+        end
+      end
+
       instance = Class.new do
         attr_accessor :request, :response, :cookies
         include RSpec::Mocks::ExampleMethods
@@ -27,11 +39,10 @@ RSpec.describe JWTKeeper do
         end
       end.new
 
-      instance.request =
-        instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-      instance.response =
-        instance_double('Response', headers: {})
-      instance.cookies = {}
+      instance.request  = message_klass.new
+      instance.response = message_klass.new
+      instance.cookies  = cookies_klass.new
+      instance.request['Authorization'] = "Bearer #{token}"
       instance
     end
 
@@ -40,7 +51,6 @@ RSpec.describe JWTKeeper do
       it { is_expected.to respond_to(:read_authentication_token) }
       it { is_expected.to respond_to(:write_authentication_token) }
       it { is_expected.to respond_to(:clear_authentication_token) }
-      it { is_expected.to respond_to(:redirect_back_or_to) }
       it { is_expected.to respond_to(:not_authenticated) }
       it { is_expected.to respond_to(:authenticated) }
       it { is_expected.to respond_to(:regenerate_claims) }
@@ -127,23 +137,28 @@ RSpec.describe JWTKeeper do
         allow(test_controller).to receive(:authenticated)
       end
 
-      pending 'is used to update the token claims on rotation' do
+      it 'is used to update the token claims on rotation' do
         expect(subject.read_authentication_token.claims[:regenerate_claims]).to be nil
-        expect { subject.require_authentication }.to change(subject, :read_authentication_token)
+        subject.require_authentication
         expect(subject.read_authentication_token.claims[:regenerate_claims]).to be true
       end
     end
 
-    describe '#redirect_back_or_to' do
-      let(:path) { 'http://www.example.com' }
-
-      before do
-        allow(test_controller).to receive(:redirect_to)
+    describe '#clear_authentication_token' do
+      before :each do
+        subject.write_authentication_token(JWTKeeper::Token.create({}))
       end
 
-      it 'it calls redirect_to' do
-        subject.redirect_back_or_to(path)
-        expect(subject).to have_received(:redirect_to).with(path, anything)
+      it 'clears the cookie' do
+        expect(subject.cookies.signed['jwt_keeper']).not_to be_nil
+        subject.clear_authentication_token
+        expect(subject.cookies.signed['jwt_keeper']).to be_nil
+      end
+
+      it 'clears the header' do
+        expect(subject.response.headers['Authorization']).not_to be_nil
+        subject.clear_authentication_token
+        expect(subject.response.headers['Authorization']).to be_nil
       end
     end
 

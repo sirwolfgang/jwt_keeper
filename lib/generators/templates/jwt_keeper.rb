@@ -32,4 +32,12 @@ JWTKeeper.configure do |config|
 
   # Use a httponly/secure cookie secret to prevent session hijacking
   # config.cookie_lock      = true
+
+  # Used to turn off TLS only mode on the cookie, for development mode. Defaults to true
+  # config.cookie_secure    = !(Rails.env.test? || Rails.env.development?)
+
+  # Used to limit or lock down the allowed domains for the jwt/cookie
+  # http://api.rubyonrails.org/classes/ActionDispatch/Cookies.html
+  # Defaults the value of :all
+  # config.cookie_domain    = :all
 end

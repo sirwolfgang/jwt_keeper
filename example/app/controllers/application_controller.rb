@@ -5,10 +5,6 @@ class ApplicationController < ActionController::Base
   before_action :default_format_json
   before_action :require_authentication
 
-  def authentication_token=(token)
-    @authentication_token = write_authentication_token(token)
-  end
-
   private
 
   def default_format_json

@@ -117,11 +117,8 @@ module JWTKeeper
     def to_cookie
       {
         value: cookie_secret,
-        expires: Time.at(claims[:exp]),
-        # domain: :all,
-        # secure: true,
-        # httponly: true
-      }
+        expires: Time.at(claims[:exp])
+      }.merge(JWTKeeper.configuration.cookie_options)
     end
 
     # @!visibility private

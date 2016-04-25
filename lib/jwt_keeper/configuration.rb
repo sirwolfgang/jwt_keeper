@@ -8,7 +8,9 @@ module JWTKeeper
       audience:         'example.com',
       redis_connection: nil,
       version:          nil,
-      cookie_lock:      false
+      cookie_lock:      false,
+      cookie_secure:    true,
+      cookie_domain:    :all
     }.freeze
 
     # Creates a new Configuration from the passed in parameters
@@ -25,6 +27,15 @@ module JWTKeeper
         aud: JWTKeeper.configuration.audience,             # audience
         exp: JWTKeeper.configuration.expiry.from_now.to_i, # expiration time
         ver: JWTKeeper.configuration.version               # Version
+      }
+    end
+
+    # @!visibility private
+    def cookie_options
+      {
+        domain: JWTKeeper.configuration.cookie_domain,
+        secure: JWTKeeper.configuration.cookie_secure,
+        httponly: true
       }
     end
   end

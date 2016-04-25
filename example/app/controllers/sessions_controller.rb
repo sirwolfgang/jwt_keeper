@@ -1,7 +1,16 @@
 class SessionsController < ApplicationController
   skip_before_action :require_authentication, only: :create
 
-  # GET /sessions
+  # GET /session
+  def show
+    token = read_authentication_token
+
+    respond_to do |format|
+      format.json { render json: token }
+    end
+  end
+
+  # POST /session
   def create
     @user = { id: 1 }
 
@@ -10,12 +19,13 @@ class SessionsController < ApplicationController
         write_authentication_token(JWTKeeper::Token.create(uid: @user[:id]))
         format.json { head :created }
       else
+        clear_authentication_token
         format.json { head :unauthorized }
       end
     end
   end
 
-  # PATCH/PUT /sessions
+  # PATCH/PUT /session
   def update
     token = read_authentication_token
 
@@ -24,18 +34,18 @@ class SessionsController < ApplicationController
         write_authentication_token(token)
         format.json { head :created }
       else
+        clear_authentication_token
         format.json { head :unauthorized }
       end
     end
   end
 
-  # DELETE /sessions
+  # DELETE /session
   def destroy
-    token = read_authentication_token
-    token.revoke
-    clear_authentication_token
+    read_authentication_token.revoke
 
     respond_to do |format|
+      clear_authentication_token
       format.json { head :no_content }
     end
   end
