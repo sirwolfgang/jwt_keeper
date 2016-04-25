@@ -1,8 +1,8 @@
 # inherit_from: .rubocop_todo.yml
 AllCops:
   Include:
-    - 'Gemfile'
-    - 'Rakefile'
+    - '**/Gemfile'
+    - '**/Rakefile'
     - '**/*.rake'
 Documentation:
   Enabled: false

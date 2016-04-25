@@ -6,8 +6,20 @@ RSpec.describe JWTKeeper do
 
     let(:token) { JWTKeeper::Token.create(claim: "Jet fuel can't melt steel beams") }
     subject(:test_controller) do
+      cookies_klass = Class.new(Hash) do
+        def signed
+          self
+        end
+      end
+
+      message_klass = Class.new(Hash) do
+        def headers
+          self
+        end
+      end
+
       instance = Class.new do
-        attr_accessor :request, :response
+        attr_accessor :request, :response, :cookies
         include RSpec::Mocks::ExampleMethods
         include JWTKeeper::Controller
 
@@ -27,20 +39,21 @@ RSpec.describe JWTKeeper do
         end
       end.new
 
-      instance.request =
-        instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-      instance.response =
-        instance_double('Response', headers: {})
+      instance.request  = message_klass.new
+      instance.response = message_klass.new
+      instance.cookies  = cookies_klass.new
+      instance.request['Authorization'] = "Bearer #{token}"
       instance
     end
 
     describe '#included' do
       it { is_expected.to respond_to(:require_authentication) }
-      it { is_expected.to respond_to(:authentication_token) }
-      it { is_expected.to respond_to(:authentication_token=) }
-      it { is_expected.to respond_to(:redirect_back_or_to) }
+      it { is_expected.to respond_to(:read_authentication_token) }
+      it { is_expected.to respond_to(:write_authentication_token) }
+      it { is_expected.to respond_to(:clear_authentication_token) }
       it { is_expected.to respond_to(:not_authenticated) }
       it { is_expected.to respond_to(:authenticated) }
+      it { is_expected.to respond_to(:regenerate_claims) }
     end
 
     describe '#require_authentication' do
@@ -56,7 +69,7 @@ RSpec.describe JWTKeeper do
 
         it 'does not rotates the token' do
           expect { subject.require_authentication }.to_not change {
-            subject.authentication_token.id
+            subject.read_authentication_token.id
           }
         end
       end
@@ -90,7 +103,7 @@ RSpec.describe JWTKeeper do
 
         it 'rotates the token' do
           expect { subject.require_authentication }.to change {
-            subject.authentication_token.id
+            subject.read_authentication_token.id
           }
         end
       end
@@ -108,7 +121,7 @@ RSpec.describe JWTKeeper do
 
         it 'rotates the token' do
           expect { subject.require_authentication }.to change {
-            subject.authentication_token.id
+            subject.read_authentication_token.id
           }
         end
       end
@@ -125,52 +138,27 @@ RSpec.describe JWTKeeper do
       end
 
       it 'is used to update the token claims on rotation' do
-        expect(subject.authentication_token.claims[:regenerate_claims]).to be nil
-        expect { subject.require_authentication }.to change(subject, :authentication_token)
-        expect(subject.authentication_token.claims[:regenerate_claims]).to be true
+        expect(subject.read_authentication_token.claims[:regenerate_claims]).to be nil
+        subject.require_authentication
+        expect(subject.read_authentication_token.claims[:regenerate_claims]).to be true
       end
     end
 
-    describe '#respond_with_authentication' do
-      before do
-        subject.authentication_token = token
+    describe '#clear_authentication_token' do
+      before :each do
+        subject.write_authentication_token(JWTKeeper::Token.create({}))
       end
 
-      it 'sets the reponses token with the authentication_token' do
-        subject.respond_with_authentication
-        expect(subject.response.headers['Authorization']).to eq "Bearer #{token}"
-      end
-    end
-
-    describe '#authentication_token' do
-      context 'valid request in token' do
-        it 'returns the decoded token from the current request' do
-          expect(subject.authentication_token.claims[:claim]).to eq "Jet fuel can't melt steel beams"
-        end
-      end
-      context 'no token in request' do
-        before do
-          token = JWTKeeper::Token.create(exp: 3.hours.ago)
-          subject.request =
-            instance_double('Request', headers: { 'Authorization' => "Bearer #{token}" })
-        end
-
-        it 'returns nil' do
-          expect(subject.authentication_token).to be nil
-        end
-      end
-    end
-
-    describe '#redirect_back_or_to' do
-      let(:path) { 'http://www.example.com' }
-
-      before do
-        allow(test_controller).to receive(:redirect_to)
+      it 'clears the cookie' do
+        expect(subject.cookies.signed['jwt_keeper']).not_to be_nil
+        subject.clear_authentication_token
+        expect(subject.cookies.signed['jwt_keeper']).to be_nil
       end
 
-      it 'it calls redirect_to' do
-        subject.redirect_back_or_to(path)
-        expect(subject).to have_received(:redirect_to).with(path, anything)
+      it 'clears the header' do
+        expect(subject.response.headers['Authorization']).not_to be_nil
+        subject.clear_authentication_token
+        expect(subject.response.headers['Authorization']).to be_nil
       end
     end
 
