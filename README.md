@@ -28,13 +28,15 @@ raw_token_string = token.to_jwt
 ```
 
 ## Rails Usage
-The designed rails token flow is to receive and respond to requests with the token being present in the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of the `require_authentication` action, meaning that you will always get the latest token data as
-created by `generate_claims` in your controllers. This new token is added to the response with the `respond_with_authentication` action.
+The designed rails token flow is to receive and respond to requests with the token being present in the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of the `require_authentication` action, meaning that you will always get the latest token data as created by `generate_claims` in your controllers. This new token is added to the response with the `write_authentication_token` action.
+
+```bash
+rake generate jwt_keeper:install
+```
 
 ```ruby
 class ApplicationController < ActionController::Base
   before_action :require_authentication
-  after_action :respond_with_authentication
 
   def not_authenticated
     # Overload to return status 401
@@ -46,7 +48,7 @@ class ApplicationController < ActionController::Base
 
   def regenerate_claims(old_token)
     # Overload to update claims on automatic rotation.
-    current_user = User.find(authentication_token.claims[:uid])
+    current_user = User.find(old_token.claims[:uid])
     { uid: current_user.id, usn: current_user.email }
   end
 end
@@ -55,22 +57,25 @@ end
 ```ruby
 class SessionsController < ApplicationController
   skip_before_action :require_authentication, only: :create
-  skip_after_action :respond_with_authentication, only: :destroy
 
   # POST /sessions
   def create
-    authentication_token = JWTKeeper::Token.create({ uid: @user.id, usn: @user.email })
+    token = JWTKeeper::Token.create(uid: @user.id, usn: @user.email)
+    write_authentication_token(token)
   end
 
   # PATCH/PUT /sessions
   def update
-    authentication_token = request_token.rotate(generate_claims)
+    token = read_authentication_token
+    token.rotate
+    write_authentication_token(token)
   end
 
   # DELETE /sessions
   def destroy
-    request_token.revoke
-    authentication_token = nil
+    token = read_authentication_token
+    token.revoke
+    clear_authentication_token
   end
 ```
 
