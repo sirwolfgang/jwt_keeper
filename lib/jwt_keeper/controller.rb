@@ -2,11 +2,9 @@ module JWTKeeper
   module Controller
     extend ActiveSupport::Concern
 
-    module ClassMethods
-    end
-
     # Available to be used as a before_action by the application's controllers. This is
     # the main logical section for decoding, and automatically rotating tokens
+    # @return [void]
     def require_authentication
       token = read_authentication_token
 
@@ -25,6 +23,7 @@ module JWTKeeper
     end
 
     # Decodes and returns the token
+    # @return [Token] the token read from request
     def read_authentication_token
       return nil unless request.headers['Authorization']
       @authentication_token ||=
@@ -35,6 +34,8 @@ module JWTKeeper
     end
 
     # Encodes and writes the token
+    # @param token [Token] The token to be written
+    # @return [Token] the token written to response
     def write_authentication_token(token)
       return clear_authentication_token if token.nil?
       response.headers['Authorization'] = "Bearer #{token.to_jwt}"
@@ -43,6 +44,7 @@ module JWTKeeper
     end
 
     # delets the authentication token
+    # @return [void]
     def clear_authentication_token
       response.headers['Authorization'] = nil
       cookies.delete('jwt_keeper')
@@ -51,18 +53,21 @@ module JWTKeeper
 
     # The default action for denying non-authenticated connections.
     # You can override this method in your controllers
+    # @return [void]
     def not_authenticated
       redirect_to root_path
     end
 
     # The default action for accepting authenticated connections.
     # You can override this method in your controllers
+    # @return [void]
     def authenticated(token)
     end
 
     # Invoked by the require_authentication method as part of the automatic rotation
     # process. The application should override this method to include the necessary
     # claims.
+    # @return [void]
     def regenerate_claims(old_token)
     end
   end

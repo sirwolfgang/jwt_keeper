@@ -1,9 +1,13 @@
 module JWTKeeper
+  # This class acts as the main interface to wrap the concerns of JWTs. Handling everything from
+  # encoding to invalidation.
   class Token
     attr_accessor :claims, :cookie_secret
 
     # Initalizes a new web token
     # @param private_claims [Hash] the custom claims to encode
+    # @param cookie_secret [String] the cookie secret to use during encoding
+    # @return [void]
     def initialize(private_claims = {}, cookie_secret = nil)
       @cookie_secret = cookie_secret
       @claims = {
@@ -25,6 +29,7 @@ module JWTKeeper
 
     # Decodes and validates an existing token
     # @param raw_token [String] the raw token
+    # @param cookie_secret [String] the cookie secret
     # @return [Token] token object
     def self.find(raw_token, cookie_secret = nil)
       claims = decode(raw_token, cookie_secret)
@@ -39,12 +44,14 @@ module JWTKeeper
     # is inherently ignored by the token's exp check and then rewritten with the revokation on
     # rotate.
     # @param token_jti [String] the token unique id
+    # @return [void]
     def self.rotate(token_jti)
       Datastore.rotate(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
     end
 
     # Revokes a web token
     # @param token_jti [String] the token unique id
+    # @return [void]
     def self.revoke(token_jti)
       Datastore.revoke(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
     end
@@ -57,7 +64,7 @@ module JWTKeeper
 
     # Revokes and creates a new web token
     # @param new_claims [Hash] Used to override and update claims during rotation
-    # @return [String] new token
+    # @return [Token]
     def rotate(new_claims = nil)
       revoke
 
@@ -70,6 +77,7 @@ module JWTKeeper
     end
 
     # Revokes a web token
+    # @return [void]
     def revoke
       return if invalid?
       Datastore.revoke(id, claims[:exp] - DateTime.now.to_i)
@@ -106,14 +114,14 @@ module JWTKeeper
     end
 
     # Encodes the jwt
-    # @return [String]
+    # @return [String] the encoded jwt
     def to_jwt
       encode
     end
     alias to_s to_jwt
 
     # Encodes the cookie
-    # @return [Hash]
+    # @return [Hash] the cookie options
     def to_cookie
       {
         value: cookie_secret,
