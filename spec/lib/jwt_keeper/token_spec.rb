@@ -17,6 +17,13 @@ module JWTKeeper
         before { JWTKeeper.configure(JWTKeeper::Configuration.new(config.merge(cookie_lock: true))) }
         it { expect(subject.cookie_secret).not_to be_empty }
       end
+
+      context 'when overiding default claims' do
+        let(:private_claims) { { exp: 1.minute.from_now.to_i } }
+
+        it { is_expected.to be_instance_of described_class }
+        it { expect(subject.claims[:exp]).to eql private_claims[:exp] }
+      end
     end
 
     describe '.find' do
