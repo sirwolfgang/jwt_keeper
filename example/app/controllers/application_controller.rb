@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   private
 
   def default_format_json
-    request.format ||= 'json'
+    request.format = 'json'
   end
 
   def not_authenticated

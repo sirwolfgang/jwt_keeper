@@ -9,7 +9,9 @@ SimpleCov.formatter =
                                              SimpleCov::Formatter::HTMLFormatter,
                                              CodeClimate::TestReporter::Formatter
                                            ])
-SimpleCov.start
+SimpleCov.start do
+  add_filter '/spec/'
+end
 
 require 'rails'
 require 'jwt_keeper'
