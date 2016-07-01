@@ -1,4 +1,5 @@
 # JWT Keeper
+[![Gem Version](https://img.shields.io/gem/v/jwt_keeper.svg?maxAge=2592000)](https://rubygems.org/gems/jwt_keeper)
 [![Build Status](https://img.shields.io/travis/sirwolfgang/jwt_keeper/master.svg)](https://travis-ci.org/sirwolfgang/jwt_keeper)
 [![Dependency Status](https://img.shields.io/gemnasium/sirwolfgang/jwt_keeper.svg)](https://gemnasium.com/sirwolfgang/jwt_keeper)
 [![Code Climate](https://img.shields.io/codeclimate/github/sirwolfgang/jwt_keeper.svg)](https://codeclimate.com/github/sirwolfgang/jwt_keeper)
