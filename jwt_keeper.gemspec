@@ -28,8 +28,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'fuubar'
   spec.add_development_dependency 'simplecov'
 
-  spec.add_dependency 'redis', '~> 4.1'
-  spec.add_dependency 'rails', '~> 5.2'
-  spec.add_dependency 'activesupport', '~> 5.2'
-  spec.add_dependency 'jwt', '~> 2.0'
+  spec.add_dependency 'redis'
+  spec.add_dependency 'rails', '~> 5.0'
+  spec.add_dependency 'activesupport', '~> 5.0'
+  spec.add_dependency 'jwt', '>= 1.5'
 end
