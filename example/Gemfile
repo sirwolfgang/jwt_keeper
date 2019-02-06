@@ -1,11 +1,13 @@
 source 'https://rubygems.org'
 
 gem 'puma'
-gem 'rails', '~> 5.1.0'
+gem 'rails', '~> 5.2.0'
 
 gem 'jwt_keeper', path: '..'
 
 group :development, :test do
+  gem 'listen'
+
   gem 'dotenv-rails'
 
   gem 'pry'
