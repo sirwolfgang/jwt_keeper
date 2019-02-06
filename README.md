@@ -1,9 +1,8 @@
 # JWT Keeper
 [![Gem Version](https://img.shields.io/gem/v/jwt_keeper.svg?maxAge=2592000)](https://rubygems.org/gems/jwt_keeper)
 [![Build Status](https://img.shields.io/travis/sirwolfgang/jwt_keeper/master.svg)](https://travis-ci.org/sirwolfgang/jwt_keeper)
-[![Dependency Status](https://img.shields.io/gemnasium/sirwolfgang/jwt_keeper.svg)](https://gemnasium.com/sirwolfgang/jwt_keeper)
-[![Code Climate](https://img.shields.io/codeclimate/github/sirwolfgang/jwt_keeper.svg)](https://codeclimate.com/github/sirwolfgang/jwt_keeper)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/github/sirwolfgang/jwt_keeper.svg)](https://codeclimate.com/github/sirwolfgang/jwt_keeper/coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/dd79d41d1d596e9335e4/maintainability)](https://codeclimate.com/github/sirwolfgang/jwt_keeper/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/dd79d41d1d596e9335e4/test_coverage)](https://codeclimate.com/github/sirwolfgang/jwt_keeper/test_coverage)
 [![Inline docs](http://inch-ci.org/github/sirwolfgang/jwt_keeper.svg?style=shields)](http://inch-ci.org/github/sirwolfgang/jwt_keeper)
 
 An managing interface layer for handling the creation and validation of JWTs.
