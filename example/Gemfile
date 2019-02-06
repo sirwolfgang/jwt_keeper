@@ -1,15 +1,17 @@
 source 'https://rubygems.org'
 
-gem 'rails', '5.0.0'
 gem 'puma'
+gem 'rails', '~> 5.2.0'
 
 gem 'jwt_keeper', path: '..'
 
 group :development, :test do
+  gem 'listen'
+
   gem 'dotenv-rails'
 
   gem 'pry'
-  gem 'pry-stack_explorer'
-  gem 'pry-rescue'
   gem 'pry-byebug'
+  gem 'pry-rescue'
+  gem 'pry-stack_explorer'
 end
