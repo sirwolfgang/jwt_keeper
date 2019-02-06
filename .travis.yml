@@ -8,13 +8,19 @@ rvm:
 matrix:
   allow_failures:
     - rvm: ruby-head
-addons:
-  code_climate:
-    repo_token: f69bb189f348c1d7992d8ed8690d0a2c9c885c1aac45e2f4d48732034592b37b
 services:
   - redis-server
 env:
   global:
     - REDIS_URL=redis://localhost:6379
+    - CC_TEST_REPORTER_ID=f69bb189f348c1d7992d8ed8690d0a2c9c885c1aac45e2f4d48732034592b37b
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+script:
+  - bundle exec rspec
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 notifications:
   email: false

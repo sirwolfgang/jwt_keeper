@@ -2,13 +2,8 @@ require 'dotenv'
 Dotenv.load
 
 require 'simplecov'
-require 'codeclimate-test-reporter'
 
-SimpleCov.formatter =
-  SimpleCov::Formatter::MultiFormatter.new([
-                                             SimpleCov::Formatter::HTMLFormatter,
-                                             CodeClimate::TestReporter::Formatter
-                                           ])
+SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter
 SimpleCov.start do
   add_filter '/spec/'
 end
