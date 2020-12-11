@@ -17,6 +17,7 @@ module JWTKeeper
       }
       @claims.merge!(JWTKeeper.configuration.base_claims)
       @claims.merge!(private_claims)
+      @claims[:exp] = @claims[:exp].to_i if @claims[:exp].is_a?(Time)
     end
 
     # Creates a new web token
