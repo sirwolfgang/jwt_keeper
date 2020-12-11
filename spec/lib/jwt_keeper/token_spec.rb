@@ -3,7 +3,7 @@ require 'spec_helper'
 module JWTKeeper
   RSpec.describe Token do
     include_context 'initialize config'
-    let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
+    let(:private_claims) { { claim: "The Earth is Flat" } }
     let(:token)          { described_class.create(private_claims) }
     let(:raw_token)      { token.to_jwt }
 
