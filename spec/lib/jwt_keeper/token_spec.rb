@@ -3,7 +3,7 @@ require 'spec_helper'
 module JWTKeeper
   RSpec.describe Token do
     include_context 'initialize config'
-    let(:private_claims) { { claim: "Jet fuel can't melt steel beams" } }
+    let(:private_claims) { { claim: "The Earth is Flat" } }
     let(:token)          { described_class.create(private_claims) }
     let(:raw_token)      { token.to_jwt }
 
@@ -42,16 +42,23 @@ module JWTKeeper
         it { is_expected.to be nil }
       end
 
-      context 'with bad cookie' do
-        subject { described_class.find(raw_token, 'BAD_COOKIE') }
-        it { is_expected.to be nil }
-      end
-
-      context 'with valid cookie' do
+      context 'describe with cookie locking' do
         before { JWTKeeper.configure(JWTKeeper::Configuration.new(config.merge(cookie_lock: true))) }
-        subject { described_class.find(raw_token, token.cookie_secret) }
 
-        it { is_expected.to be_instance_of described_class }
+        context 'with no cookie' do
+          subject { described_class.find(raw_token, nil) }
+          it { is_expected.to be nil }
+        end
+
+        context 'with bad cookie' do
+          subject { described_class.find(raw_token, 'BAD_COOKIE') }
+          it { is_expected.to be nil }
+        end
+
+        context 'with valid cookie' do
+          subject { described_class.find(raw_token, token.cookie_secret) }
+          it { is_expected.to be_instance_of described_class }
+        end
       end
     end
 
