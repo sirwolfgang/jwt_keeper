@@ -42,16 +42,23 @@ module JWTKeeper
         it { is_expected.to be nil }
       end
 
-      context 'with bad cookie' do
-        subject { described_class.find(raw_token, 'BAD_COOKIE') }
-        it { is_expected.to be nil }
-      end
-
-      context 'with valid cookie' do
+      context 'describe with cookie locking' do
         before { JWTKeeper.configure(JWTKeeper::Configuration.new(config.merge(cookie_lock: true))) }
-        subject { described_class.find(raw_token, token.cookie_secret) }
 
-        it { is_expected.to be_instance_of described_class }
+        context 'with no cookie' do
+          subject { described_class.find(raw_token, nil) }
+          it { is_expected.to be nil }
+        end
+
+        context 'with bad cookie' do
+          subject { described_class.find(raw_token, 'BAD_COOKIE') }
+          it { is_expected.to be nil }
+        end
+
+        context 'with valid cookie' do
+          subject { described_class.find(raw_token, token.cookie_secret) }
+          it { is_expected.to be_instance_of described_class }
+        end
       end
     end
 
