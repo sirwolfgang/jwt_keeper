@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 JWTKeeper.configure do |config|
   # The time to expire for the tokens
   # config.expiry           = 1.hour

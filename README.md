@@ -37,6 +37,8 @@ rake generate jwt_keeper:install
 
 ```ruby
 class ApplicationController < ActionController::Base
+  include JWTKeeper::Controller
+
   before_action :require_authentication
 
   def not_authenticated

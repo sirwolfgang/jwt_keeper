@@ -23,6 +23,4 @@ module JWTKeeper
 
     @configuration = new_configuration.freeze
   end
-
-  require 'jwt_keeper/engine' if defined?(Rails)
 end
