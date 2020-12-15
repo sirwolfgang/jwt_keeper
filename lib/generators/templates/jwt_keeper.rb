@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 JWTKeeper.configure do |config|
   # The time to expire for the tokens
   # config.expiry           = 1.hour
@@ -26,6 +28,9 @@ JWTKeeper.configure do |config|
 
   # the location of redis config file
   # config.redis_connection = Redis.new(connection_options)
+  # config.redis_connection = ConnectionPool.new(size: ENV.fetch('RAILS_MAX_THREADS', 5)) do
+  #   Redis.new(url: ENV['REDISCLOUD_URL'] || 'redis://localhost:6379/')
+  # end
 
   # A unique idenfitier for the token version.
   # config.version          = 1

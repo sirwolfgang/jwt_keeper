@@ -1,4 +1,4 @@
 # Gem Version
 module JWTKeeper
-  VERSION = '3.3.0'.freeze
+  VERSION = '4.0.0'.freeze
 end
