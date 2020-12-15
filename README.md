@@ -32,7 +32,7 @@ raw_token_string = token.to_jwt
 The designed rails token flow is to receive and respond to requests with the token being present in the `Authorization` part of the header. This is to allow us to seamlessly rotate the tokens on the fly without having to rebuff the request as part of the user flow. Automatic rotation happens as part of the `require_authentication` action, meaning that you will always get the latest token data as created by `generate_claims` in your controllers. This new token is added to the response with the `write_authentication_token` action.
 
 ```bash
-rake generate jwt_keeper:install
+rails generate jwt_keeper:install
 ```
 
 ```ruby

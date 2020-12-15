@@ -29,7 +29,7 @@ module JWTKeeper
       @authentication_token ||=
         JWTKeeper::Token.find(
           request.headers['Authorization'].split.last,
-          cookies.signed['jwt_keeper']
+          defined?(cookies) && cookies.signed['jwt_keeper']
         )
     end
 
@@ -39,7 +39,7 @@ module JWTKeeper
     def write_authentication_token(token)
       return clear_authentication_token if token.nil?
       response.headers['Authorization'] = "Bearer #{token.to_jwt}"
-      cookies.signed['jwt_keeper'] = token.to_cookie
+      defined?(cookies) && cookies.signed['jwt_keeper'] = token.to_cookie
       @authentication_token = token
     end
 
@@ -47,7 +47,7 @@ module JWTKeeper
     # @return [void]
     def clear_authentication_token
       response.headers['Authorization'] = nil
-      cookies.delete('jwt_keeper')
+      defined?(cookies) && cookies.delete('jwt_keeper')
       @authentication_token = nil
     end
 
