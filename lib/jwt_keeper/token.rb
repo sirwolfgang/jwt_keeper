@@ -15,6 +15,7 @@ module JWTKeeper
         iat: DateTime.now.to_i, # issued at
         jti: SecureRandom.uuid  # JWT ID
       }
+
       @claims.merge!(JWTKeeper.configuration.base_claims)
       @claims.merge!(private_claims)
       @claims[:exp] = @claims[:exp].to_i if @claims[:exp].is_a?(Time)
@@ -36,7 +37,9 @@ module JWTKeeper
       claims = decode(raw_token, cookie_secret)
       return nil if claims.nil?
 
-      new_token = new(claims, cookie_secret)
+      new_token = new({}, cookie_secret)
+      new_token.claims = claims
+
       return nil if new_token.revoked?
       new_token
     end
@@ -152,7 +155,7 @@ module JWTKeeper
 
     # @!visibility private
     def encode
-      JWT.encode(claims,
+      JWT.encode(claims.compact,
                  JWTKeeper.configuration.secret.to_s + cookie_secret.to_s,
                  JWTKeeper.configuration.algorithm
                 )
