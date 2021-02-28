@@ -24,6 +24,15 @@ module JWTKeeper
         it { is_expected.to be_instance_of described_class }
         it { expect(subject.claims[:exp]).to eql private_claims[:exp] }
       end
+
+      context 'when overriding default secret' do
+        subject { described_class.create(**private_claims, secret: secret) }
+
+        let(:secret) { SecureRandom.uuid }
+
+        it { is_expected.to be_instance_of described_class }
+        it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
+      end
     end
 
     describe '.find' do
@@ -46,19 +55,29 @@ module JWTKeeper
         before { JWTKeeper.configure(JWTKeeper::Configuration.new(config.merge(cookie_lock: true))) }
 
         context 'with no cookie' do
-          subject { described_class.find(raw_token, nil) }
+          subject { described_class.find(raw_token, cookie_secret: nil) }
           it { is_expected.to be nil }
         end
 
         context 'with bad cookie' do
-          subject { described_class.find(raw_token, 'BAD_COOKIE') }
+          subject { described_class.find(raw_token, cookie_secret: 'BAD_COOKIE') }
           it { is_expected.to be nil }
         end
 
         context 'with valid cookie' do
-          subject { described_class.find(raw_token, token.cookie_secret) }
+          subject { described_class.find(raw_token, cookie_secret: token.cookie_secret) }
           it { is_expected.to be_instance_of described_class }
         end
+      end
+
+      context 'when overriding default secret' do
+        subject { described_class.find(raw_token, secret: secret) }
+
+        let(:token) { described_class.create(**private_claims, secret: secret) }
+        let(:secret) { SecureRandom.uuid }
+
+        it { is_expected.to be_instance_of described_class }
+        it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
       end
     end
 
@@ -193,6 +212,16 @@ module JWTKeeper
 
       context 'when valid' do
         it { is_expected.to be_valid }
+      end
+
+      context 'with overriden secret' do
+        subject { described_class.create(**private_claims, secret: secret) }
+
+        let(:secret) { SecureRandom.uuid }
+
+        context 'when valid' do
+          it { is_expected.to be_valid }
+        end
       end
     end
 

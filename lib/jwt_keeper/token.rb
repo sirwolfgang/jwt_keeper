@@ -2,14 +2,16 @@ module JWTKeeper
   # This class acts as the main interface to wrap the concerns of JWTs. Handling everything from
   # encoding to invalidation.
   class Token
-    attr_accessor :claims, :cookie_secret
+    attr_accessor :claims, :secret, :cookie_secret
 
     # Initalizes a new web token
-    # @param private_claims [Hash] the custom claims to encode
-    # @param cookie_secret [String] the cookie secret to use during encoding
+    # @param options [Hash] the custom claims to encode
+    # @param secret the secret to use during encoding, defaults to config
+    # @param cookie_secret the cookie secret to use during encoding
     # @return [void]
-    def initialize(private_claims = {}, cookie_secret = nil)
-      @cookie_secret = cookie_secret
+    def initialize(options = {})
+      @secret = options.delete(:secret) || JWTKeeper.configuration.secret
+      @cookie_secret = options.delete(:cookie_secret)
       @claims = {
         nbf: DateTime.now.to_i, # not before
         iat: DateTime.now.to_i, # issued at
@@ -17,27 +19,28 @@ module JWTKeeper
       }
 
       @claims.merge!(JWTKeeper.configuration.base_claims)
-      @claims.merge!(private_claims)
+      @claims.merge!(options)
       @claims[:exp] = @claims[:exp].to_i if @claims[:exp].is_a?(Time)
     end
 
     # Creates a new web token
-    # @param private_claims [Hash] the custom claims to encode
+    # @param options [Hash] the custom claims to encode
+    # @param secret the secret to use during encoding, defaults to config
     # @return [Token] token object
-    def self.create(private_claims)
+    def self.create(options)
       cookie_secret = SecureRandom.hex(16) if JWTKeeper.configuration.cookie_lock
-      new(private_claims, cookie_secret)
+      new(options.merge(cookie_secret: cookie_secret))
     end
 
     # Decodes and validates an existing token
     # @param raw_token [String] the raw token
     # @param cookie_secret [String] the cookie secret
     # @return [Token] token object
-    def self.find(raw_token, cookie_secret = nil)
-      claims = decode(raw_token, cookie_secret)
+    def self.find(raw_token, secret: nil, cookie_secret: nil)
+      claims = decode(raw_token, secret: secret, cookie_secret: cookie_secret)
       return nil if claims.nil?
 
-      new_token = new({}, cookie_secret)
+      new_token = new(secret: secret, cookie_secret: cookie_secret)
       new_token.claims = claims
 
       return nil if new_token.revoked?
@@ -114,7 +117,11 @@ module JWTKeeper
     # Checks if the token invalid?
     # @return [Boolean]
     def invalid?
-      self.class.decode(encode, cookie_secret).nil? || revoked?
+      self.class.decode(
+        encode,
+        secret: secret,
+        cookie_secret: cookie_secret
+      ).nil? || revoked?
     end
 
     # Encodes the jwt
@@ -134,8 +141,10 @@ module JWTKeeper
     end
 
     # @!visibility private
-    def self.decode(raw_token, cookie_secret)
-      JWT.decode(raw_token, JWTKeeper.configuration.secret.to_s + cookie_secret.to_s, true,
+    def self.decode(raw_token, secret: nil, cookie_secret: nil)
+      secret ||= JWTKeeper.configuration.secret
+
+      JWT.decode(raw_token, secret.to_s + cookie_secret.to_s, true,
                  algorithm: JWTKeeper.configuration.algorithm,
                  verify_iss: true,
                  verify_aud: true,
@@ -156,7 +165,7 @@ module JWTKeeper
     # @!visibility private
     def encode
       JWT.encode(claims.compact,
-                 JWTKeeper.configuration.secret.to_s + cookie_secret.to_s,
+                 secret.to_s + cookie_secret.to_s,
                  JWTKeeper.configuration.algorithm
                 )
     end

@@ -5,6 +5,7 @@ RSpec.describe JWTKeeper do
     include_context 'initialize config'
 
     let(:token) { JWTKeeper::Token.create(claim: "The Earth is Flat") }
+
     subject(:test_controller) do
       cookies_klass = Class.new(Hash) do
         def signed

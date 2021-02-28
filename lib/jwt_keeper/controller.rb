@@ -29,7 +29,7 @@ module JWTKeeper
       @authentication_token ||=
         JWTKeeper::Token.find(
           request.headers['Authorization'].split.last,
-          defined?(cookies) && cookies.signed['jwt_keeper']
+          cookie_secret: defined?(cookies) && cookies.signed['jwt_keeper']
         )
     end
 
