@@ -33,6 +33,16 @@ module JWTKeeper
         it { is_expected.to be_instance_of described_class }
         it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
       end
+
+      context 'when overriding default issuer' do
+        subject { described_class.create(**private_claims, iss: issuer) }
+
+        let(:issuer) { 'ISSUER' }
+
+        it { is_expected.to be_instance_of described_class }
+        it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
+        it { expect(subject.claims[:iss]).to eql issuer }
+      end
     end
 
     describe '.find' do
@@ -78,6 +88,23 @@ module JWTKeeper
 
         it { is_expected.to be_instance_of described_class }
         it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
+      end
+
+      context 'when overriding default issuer' do
+        subject { described_class.find(raw_token, iss: issuer) }
+
+        let(:token) { described_class.create(**private_claims, iss: issuer) }
+        let(:issuer) { 'ISSUER' }
+
+        it { is_expected.to be_instance_of described_class }
+        it { expect(subject.claims[:claim]).to eql private_claims[:claim] }
+        it { expect(subject.claims[:iss]).to eql issuer }
+
+        context 'with an issuer mismatch' do
+          subject { described_class.find(raw_token) }
+
+          it { is_expected.to be nil }
+        end
       end
     end
 
@@ -200,6 +227,13 @@ module JWTKeeper
       it { expect(new_token).to be_valid }
       it { expect(old_token.claims[:claim]).to eq new_token.claims[:claim] }
       it { expect(old_token.cookie_secret).not_to eq new_token.cookie_secret }
+
+      context 'with a foreign issued token' do
+        let(:old_token) { described_class.create(**private_claims, iss: 'ISSUER') }
+        let(:new_token) { old_token.rotate }
+
+        it { expect(old_token).to eq new_token }
+      end
     end
 
     describe '#valid?' do

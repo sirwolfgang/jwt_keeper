@@ -36,11 +36,11 @@ module JWTKeeper
     # @param raw_token [String] the raw token
     # @param cookie_secret [String] the cookie secret
     # @return [Token] token object
-    def self.find(raw_token, secret: nil, cookie_secret: nil)
-      claims = decode(raw_token, secret: secret, cookie_secret: cookie_secret)
+    def self.find(raw_token, secret: nil, cookie_secret: nil, iss: nil)
+      claims = decode(raw_token, secret: secret, cookie_secret: cookie_secret, iss: iss)
       return nil if claims.nil?
 
-      new_token = new(secret: secret, cookie_secret: cookie_secret)
+      new_token = new(secret: secret, cookie_secret: cookie_secret, iss: iss)
       new_token.claims = claims
 
       return nil if new_token.revoked?
@@ -73,6 +73,7 @@ module JWTKeeper
     # @param new_claims [Hash] Used to override and update claims during rotation
     # @return [Token]
     def rotate(new_claims = nil)
+      return self if claims[:iss] != JWTKeeper.configuration.issuer
       revoke
 
       new_claims ||= claims.except(:iss, :aud, :exp, :nbf, :iat, :jti)
@@ -141,8 +142,9 @@ module JWTKeeper
     end
 
     # @!visibility private
-    def self.decode(raw_token, secret: nil, cookie_secret: nil)
+    def self.decode(raw_token, secret: nil, cookie_secret: nil, iss: nil)
       secret ||= JWTKeeper.configuration.secret
+      iss ||= JWTKeeper.configuration.issuer
 
       JWT.decode(raw_token, secret.to_s + cookie_secret.to_s, true,
                  algorithm: JWTKeeper.configuration.algorithm,
@@ -152,7 +154,7 @@ module JWTKeeper
                  verify_sub: false,
                  verify_jti: false,
                  leeway: 0,
-                 iss: JWTKeeper.configuration.issuer,
+                 iss: iss,
                  aud: JWTKeeper.configuration.audience
                 ).first.symbolize_keys
 
