@@ -1,4 +1,7 @@
 module JWTKeeper
+  # the session is invalid
+  class NotAuthenticatedError < StandardError; end
+
   # The token is invalid
   class InvalidTokenError < StandardError; end
 

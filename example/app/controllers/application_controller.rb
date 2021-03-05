@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::Base
   include JWTKeeper::Controller
 
+  rescue_from JWTKeeper::NotAuthenticatedError, with: :not_authenticated
+
   protect_from_forgery with: :exception
   skip_before_action :verify_authenticity_token
 

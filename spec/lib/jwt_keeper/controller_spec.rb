@@ -52,7 +52,6 @@ RSpec.describe JWTKeeper do
       it { is_expected.to respond_to(:read_authentication_token) }
       it { is_expected.to respond_to(:write_authentication_token) }
       it { is_expected.to respond_to(:clear_authentication_token) }
-      it { is_expected.to respond_to(:not_authenticated) }
       it { is_expected.to respond_to(:authenticated) }
       it { is_expected.to respond_to(:regenerate_claims) }
     end
@@ -77,13 +76,9 @@ RSpec.describe JWTKeeper do
 
       context 'with expired token' do
         let(:token) { JWTKeeper::Token.create(exp: 3.hours.ago) }
-        before do
-          allow(test_controller).to receive(:not_authenticated)
-        end
 
-        it 'calls not_authenticated' do
-          subject.require_authentication
-          expect(subject).to have_received(:not_authenticated).once
+        it 'raises NotAuthenticated' do
+          expect { subject.require_authentication }.to raise_error(JWTKeeper::NotAuthenticatedError)
         end
       end
 
@@ -160,17 +155,6 @@ RSpec.describe JWTKeeper do
         expect(subject.response.headers['Authorization']).not_to be_nil
         subject.clear_authentication_token
         expect(subject.response.headers['Authorization']).to be_nil
-      end
-    end
-
-    describe '#not_authenticated' do
-      before do
-        allow(test_controller).to receive(:redirect_to)
-      end
-
-      it 'it calls redirect_to' do
-        subject.not_authenticated
-        expect(subject).to have_received(:redirect_to).with('/')
       end
     end
   end

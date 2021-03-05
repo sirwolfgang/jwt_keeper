@@ -40,6 +40,7 @@ class ApplicationController < ActionController::Base
   include JWTKeeper::Controller
 
   before_action :require_authentication
+  rescue_from JWTKeeper::NotAuthenticatedError, with: :not_authenticated
 
   def not_authenticated
     # Overload to return status 401

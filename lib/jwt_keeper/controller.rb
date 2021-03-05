@@ -10,7 +10,7 @@ module JWTKeeper
 
       if token.nil?
         clear_authentication_token
-        return not_authenticated
+        raise JWTKeeper::NotAuthenticatedError
       end
 
       if token.version_mismatch? || token.pending?
@@ -49,13 +49,6 @@ module JWTKeeper
       response.headers['Authorization'] = nil
       defined?(cookies) && cookies.delete('jwt_keeper')
       @authentication_token = nil
-    end
-
-    # The default action for denying non-authenticated connections.
-    # You can override this method in your controllers
-    # @return [void]
-    def not_authenticated
-      redirect_to root_path
     end
 
     # The default action for accepting authenticated connections.
