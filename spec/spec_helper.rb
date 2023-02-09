@@ -39,6 +39,7 @@ RSpec.configure do |config|
 end
 
 RSpec.shared_context 'initialize config' do
+  let(:redis_connection) { RedisClient.new(url: ENV['REDIS_URL']) }
   let(:config) do
     {
       algorithm:        'HS256',
@@ -46,11 +47,12 @@ RSpec.shared_context 'initialize config' do
       expiry:           24.hours,
       issuer:           'api.example.com',
       audience:         'example.com',
-      redis_connection: Redis.new(url: ENV['REDIS_URL']),
+      redis_connection: redis_connection,
       version:          nil,
       cookie_lock:      false
     }
   end
+
 
   before(:each) do
     JWTKeeper.configure(JWTKeeper::Configuration.new(config))

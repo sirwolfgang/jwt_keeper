@@ -27,10 +27,8 @@ JWTKeeper.configure do |config|
   # config.audience         = 'example.com'
 
   # the location of redis config file
-  # config.redis_connection = Redis.new(connection_options)
-  # config.redis_connection = ConnectionPool.new(size: ENV.fetch('RAILS_MAX_THREADS', 5)) do
-  #   Redis.new(url: ENV['REDISCLOUD_URL'] || 'redis://localhost:6379/')
-  # end
+  # config.redis_connection = RedisClient.new(connection_options)
+  # config.redis_connection = RedisClient.config(connection_options).new_pool(size: ENV.fetch('RAILS_MAX_THREADS', 5))
 
   # A unique idenfitier for the token version.
   # config.version          = 1

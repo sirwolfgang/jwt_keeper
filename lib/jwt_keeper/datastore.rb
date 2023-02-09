@@ -27,27 +27,40 @@ module JWTKeeper
 
       # @!visibility private
       def set_with_expiry(jti, seconds, type)
-        redis = JWTKeeper.configuration.redis_connection
-
-        if redis.is_a?(Redis)
-          redis.setex(jti, seconds, type)
-        elsif defined?(ConnectionPool) && redis.is_a?(ConnectionPool)
-          redis.with { |conn| conn.setex(jti, seconds, type) }
-        else
-          throw 'Bad Redis Connection'
+        with_redis do |redis|
+          if redis.respond_to?(:call) # For RedisClient
+            redis.call('SETEX', jti, seconds, type)
+          elsif redis.respond_to?(:setex) # For Redis
+            redis.setex(jti, seconds, type)
+          else
+            throw 'Bad Redis Connection'
+          end
         end
       end
 
       # @!visibility private
       def get(jti)
+        with_redis do |redis|
+          if redis.respond_to?(:call) # For RedisClient
+            redis.call('GET', jti)
+          elsif redis.respond_to?(:get) # For Redis
+            redis.get(jti)
+          else
+            throw 'Bad Redis Connection'
+          end
+        end
+      end
+
+      # @!visibility private
+      def with_redis
         redis = JWTKeeper.configuration.redis_connection
 
-        if redis.is_a?(Redis)
-          redis.get(jti)
-        elsif defined?(ConnectionPool) && redis.is_a?(ConnectionPool)
-          redis.with { |conn| conn.get(jti) }
+        if redis.respond_to?(:with)
+          redis.with do |conn|
+            yield conn
+          end
         else
-          throw 'Bad Redis Connection'
+          yield(redis)
         end
       end
     end
