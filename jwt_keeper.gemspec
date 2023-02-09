@@ -28,8 +28,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.8'
   spec.add_development_dependency 'fuubar'
   spec.add_development_dependency 'simplecov'
+  spec.add_development_dependency 'redis-client'
+  spec.add_development_dependency 'redis'
 
-  spec.add_dependency 'redis'
   spec.add_dependency 'rails'
   spec.add_dependency 'activesupport'
   spec.add_dependency 'jwt', '>= 1.5'

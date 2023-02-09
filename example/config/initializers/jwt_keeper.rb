@@ -4,7 +4,7 @@ JWTKeeper.configure do |config|
   config.secret           = 'secret'
   config.issuer           = '.localhost'
   config.audience         = 'localhost'
-  config.redis_connection = Redis.new(url: ENV['REDIS_URL'])
+  config.redis_connection = RedisClient.new(url: ENV['REDIS_URL'])
   config.version          = 1
   config.cookie_lock      = true
   config.cookie_secure    = !(Rails.env.test? || Rails.env.development?)
