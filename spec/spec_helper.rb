@@ -11,6 +11,8 @@ end
 
 require 'rails'
 require 'jwt_keeper'
+require 'redis-client'
+require 'redis'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

@@ -108,6 +108,26 @@ module JWTKeeper
       end
     end
 
+    describe '.revoked?' do
+      let(:token_jti) { SecureRandom.uuid }
+
+      context 'with a revoked token' do
+        before { described_class.revoke(token_jti) }
+
+        it { expect(described_class.revoked?(token_jti)).to be true }
+      end
+
+      context 'with a pending token' do
+        before { described_class.rotate(token_jti) }
+
+        it { expect(described_class.revoked?(token_jti)).to be false }
+      end
+
+      context 'with a valid token' do
+        it { expect(described_class.revoked?(token_jti)).to be false }
+      end
+    end
+
     describe '.rotate' do
       subject(:token) { described_class.create(private_claims) }
       before(:each) { described_class.rotate(token.id) }

@@ -63,6 +63,12 @@ module JWTKeeper
       Datastore.revoke(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
     end
 
+    # Checks if a web token has been revoked
+    # @return [Boolean]
+    def self.revoked?(token_jti)
+      Datastore.revoked?(token_jti)
+    end
+
     # Easy interface for using the token's id
     # @return [String] token's uuid
     def id
