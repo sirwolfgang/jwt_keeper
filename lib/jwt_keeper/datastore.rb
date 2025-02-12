@@ -1,5 +1,7 @@
 module JWTKeeper
   module Datastore
+    PREFIX = 'JWTKeeper:'.freeze
+
     class << self
       # @!visibility private
       def rotate(jti, seconds)
@@ -27,11 +29,13 @@ module JWTKeeper
 
       # @!visibility private
       def set_with_expiry(jti, seconds, type)
+        key = "#{PREFIX}#{jti}"
+
         with_redis do |redis|
           if redis.respond_to?(:call) # For RedisClient
-            redis.call('SETEX', jti, seconds, type)
+            redis.call('SETEX', key, seconds, type)
           elsif redis.respond_to?(:setex) # For Redis
-            redis.setex(jti, seconds, type)
+            redis.setex(key, seconds, type)
           else
             throw 'Bad Redis Connection'
           end
@@ -40,11 +44,13 @@ module JWTKeeper
 
       # @!visibility private
       def get(jti)
+        key = "#{PREFIX}#{jti}"
+
         with_redis do |redis|
           if redis.respond_to?(:call) # For RedisClient
-            redis.call('GET', jti)
+            redis.call('GET', key)
           elsif redis.respond_to?(:get) # For Redis
-            redis.get(jti)
+            redis.get(key)
           else
             throw 'Bad Redis Connection'
           end
