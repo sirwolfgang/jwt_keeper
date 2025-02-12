@@ -53,14 +53,14 @@ module JWTKeeper
     # @param token_jti [String] the token unique id
     # @return [void]
     def self.rotate(token_jti)
-      Datastore.rotate(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
+      Datastore.rotate(token_jti, JWTKeeper.configuration.expiry.to_i)
     end
 
     # Revokes a web token
     # @param token_jti [String] the token unique id
     # @return [void]
     def self.revoke(token_jti)
-      Datastore.revoke(token_jti, JWTKeeper.configuration.expiry.from_now.to_i)
+      Datastore.revoke(token_jti, JWTKeeper.configuration.expiry.to_i)
     end
 
     # Checks if a web token has been revoked
