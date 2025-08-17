@@ -35,5 +35,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'rails'
   spec.add_dependency 'activesupport'
-  spec.add_dependency 'jwt', '>= 1.5'
+  spec.add_dependency 'jwt', '~> 3.0'
 end
